@@ -23,3 +23,11 @@ Route::get('lang/{locale}', function ($locale) {
     }
     return redirect()->back();
 });
+
+Route::get('/tool/merge-pdf', function () {
+    return view('tools.merge');
+})->name('tool.merge_pdf');
+
+Route::get('/tool/split-pdf', function () {
+    return view('tools.split');
+})->name('tool.split_pdf');

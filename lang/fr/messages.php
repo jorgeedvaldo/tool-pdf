@@ -115,6 +115,13 @@ return [
     'info_feature_9_desc' => 'Les outils en ligne ToolPDF traitent les fichiers dans le cloud.',
     'info_lovers' => 'Outils en ligne pour les amateurs de PDF',
     'info_lovers_desc' => 'Outil en ligne et entièrement gratuit pour fusionner, diviser, compresser et convertir des PDF.',
-    'info_trusted' => 'Le logiciel PDF de confiance pour des millions d\'utilisateurs',
-    'info_trusted_desc' => 'ToolPDF est votre outil principal pour éditer des PDF en toute simplicité.',
+    // Split PDF Tool specific
+    'split_mode' => 'Mode de division :',
+    'split_all_pages' => 'Extraire toutes les pages',
+    'split_by_range' => 'Diviser par plages',
+    'range_start' => 'Page de début',
+    'range_end' => 'Page de fin',
+    'add_range' => 'Ajouter une plage',
+    'remove_range' => 'Supprimer',
+    'split_download_info' => 'Les pages seront téléchargées dans un fichier ZIP.',
 ];

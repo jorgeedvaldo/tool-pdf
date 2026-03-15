@@ -96,7 +96,7 @@
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
                 @foreach($category['tools'] as $tool)
                     <div class="col">
-                        <a href="#" class="text-decoration-none">
+                        <a href="{{ Route::has('tool.'.$tool['id']) ? route('tool.'.$tool['id']) : '#' }}" class="text-decoration-none">
                             <div class="card h-100 tool-card shadow-retro border-pattern">
                                 <div class="card-body text-center d-flex flex-column justify-content-center">
                                     <div class="icon-wrapper mb-3 mx-auto gradient-{{ $tool['color'] }}">

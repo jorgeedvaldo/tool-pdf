@@ -115,6 +115,13 @@ return [
     'info_feature_9_desc' => 'ToolPDF在线工具在云端处理文件，随时随地享受功能！',
     'info_lovers' => 'PDF爱好者的在线工具',
     'info_lovers_desc' => '完全免费的在线工具，用于合并，拆分，压缩和转换PDF，无需安装。',
-    'info_trusted' => '数百万用户信任的PDF软件',
-    'info_trusted_desc' => 'ToolPDF是您轻松编辑PDF的主要在线工具，保持您的数据安全。',
+    // Split PDF Tool specific
+    'split_mode' => '拆分模式:',
+    'split_all_pages' => '提取所有页面',
+    'split_by_range' => '按范围拆分',
+    'range_start' => '起始页',
+    'range_end' => '结束页',
+    'add_range' => '添加范围',
+    'remove_range' => '删除',
+    'split_download_info' => '页面将作为ZIP文件下载。',
 ];
