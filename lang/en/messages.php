@@ -115,6 +115,8 @@ return [
     'info_feature_9_desc' => 'ToolPDF online tools process files in the cloud. Enjoy functionalities from anywhere!',
     'info_lovers' => 'Online tools for PDF lovers',
     'info_lovers_desc' => 'Online and completely free tool to merge PDF, split PDF, compress PDF, convert Office documents to PDF, convert PDF to JPG, and JPG to PDF. No installation required.',
+    'info_trusted' => 'Trusted by thousands',
+    'info_trusted_desc' => 'Over a million users worldwide trust ToolPDF to process their documents safely.',
     // Split PDF Tool specific
     'split_mode' => 'Split mode:',
     'split_all_pages' => 'Extract all pages',

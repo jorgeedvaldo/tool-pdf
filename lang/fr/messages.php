@@ -115,6 +115,8 @@ return [
     'info_feature_9_desc' => 'Les outils en ligne ToolPDF traitent les fichiers dans le cloud.',
     'info_lovers' => 'Outils en ligne pour les amateurs de PDF',
     'info_lovers_desc' => 'Outil en ligne et entièrement gratuit pour fusionner, diviser, compresser et convertir des PDF.',
+    'info_trusted' => 'Approuvé par des milliers',
+    'info_trusted_desc' => 'Plus d\'un million d\'utilisateurs dans le monde font confiance à ToolPDF pour traiter leurs documents en toute sécurité.',
     // Split PDF Tool specific
     'split_mode' => 'Mode de division :',
     'split_all_pages' => 'Extraire toutes les pages',

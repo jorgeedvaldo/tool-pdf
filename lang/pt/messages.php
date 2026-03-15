@@ -115,6 +115,8 @@ return [
     'info_feature_9_desc' => 'As ferramentas online do ToolPDF processam arquivos na nuvem. Se preferir, as funcionalidades funcionam nativamente sem instalações de terceiros. Aproveite!',
     'info_lovers' => 'Ferramentas online para os amantes de PDF',
     'info_lovers_desc' => 'Ferramenta online e completamente gratuita para juntar PDF, dividir PDF, comprimir PDF, converter documentos Office para PDF, conversão de PDF para JPG, e JPG para PDF. Não requer instalação.',
+    'info_trusted' => 'Confiado por milhares',
+    'info_trusted_desc' => 'Mais de um milhão de utilizadores de todo o mundo confiam no ToolPDF para processar os seus documentos com segurança.',
     // Split PDF Tool specific
     'split_mode' => 'Modo de divisão:',
     'split_all_pages' => 'Extrair todas as páginas',

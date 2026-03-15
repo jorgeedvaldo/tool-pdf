@@ -115,6 +115,8 @@ return [
     'info_feature_9_desc' => 'Las herramientas en línea de ToolPDF procesan archivos en la nube. ¡Disfrute de las funcionalidades desde cualquier lugar!',
     'info_lovers' => 'Herramientas online para los amantes de PDF',
     'info_lovers_desc' => 'Herramienta online y completamente gratuita para unir PDF, dividir PDF, comprimir PDF, convertir documentos Office a PDF, conversión de PDF a JPG, y JPG a PDF. No requiere instalación.',
+    'info_trusted' => 'Confiable para miles',
+    'info_trusted_desc' => 'Más de un millón de usuarios en todo el mundo confían en ToolPDF para procesar sus documentos de manera segura.',
     // Split PDF Tool specific
     'split_mode' => 'Modo de división:',
     'split_all_pages' => 'Extraer todas las páginas',
