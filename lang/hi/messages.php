@@ -126,4 +126,14 @@ return [
     'add_range' => 'श्रेणी जोड़ें',
     'remove_range' => 'निकालें',
     'split_download_info' => 'पृष्ठों को एक ज़िप फ़ाइल में डाउनलोड किया जाएगा।',
+
+    // Tool UI elements
+    'rotate_left' => 'बाएं घुमाएं',
+    'rotate_right' => 'दाएं घुमाएं',
+    'remove_selected' => 'चयनित निकालें',
+    'extract_selected' => 'चयनित निकालें',
+    'password' => 'पासवर्ड',
+    'enter_password' => 'पासवर्ड दर्ज करें',
+    'watermark_text' => 'वाटरमार्क पाठ',
+    'page_numbers' => 'पृष्ठ संख्या',
 ];

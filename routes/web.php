@@ -49,4 +49,28 @@ Route::group([
         return view('tools.images_to_pdf');
     })->name('tool.images_to_pdf');
 
+    Route::get('/tool/rotate-pdf', function () {
+        return view('tools.rotate_pages');
+    })->name('tool.rotate_pages');
+
+    Route::get('/tool/remove-pages', function () {
+        return view('tools.remove_pages');
+    })->name('tool.remove_pages');
+
+    Route::get('/tool/extract-pages', function () {
+        return view('tools.extract_pages');
+    })->name('tool.extract_pages');
+
+    Route::get('/tool/unlock-pdf', function () {
+        return view('tools.unlock_pdf');
+    })->name('tool.unlock_pdf');
+
+    Route::get('/tool/add-watermark', function () {
+        return view('tools.add_watermark');
+    })->name('tool.add_watermark');
+
+    Route::get('/tool/add-page-numbers', function () {
+        return view('tools.add_page_numbers');
+    })->name('tool.add_page_numbers');
+
 });

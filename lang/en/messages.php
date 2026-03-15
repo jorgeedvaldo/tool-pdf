@@ -126,4 +126,14 @@ return [
     'add_range' => 'Add range',
     'remove_range' => 'Remove',
     'split_download_info' => 'Pages will be downloaded in a ZIP file.',
+
+    // Tool UI elements
+    'rotate_left' => 'Rotate Left',
+    'rotate_right' => 'Rotate Right',
+    'remove_selected' => 'Remove Selected',
+    'extract_selected' => 'Extract Selected',
+    'password' => 'Password',
+    'enter_password' => 'Enter Password',
+    'watermark_text' => 'Watermark Text',
+    'page_numbers' => 'Page Numbers',
 ];

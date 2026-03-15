@@ -52,6 +52,16 @@
                         <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-pen me-2 text-secondary"></i>{{ __('messages.sign_pdf') }}</a></li>
                         <li><h6 class="dropdown-header text-primary fw-bold">{{ __('messages.cat_manage') }}</h6></li>
                         <li><a class="dropdown-item" href="{{ route('tool.reorganize_pages') }}"><i class="bi bi-shuffle me-2 text-purple"></i>{{ __('messages.reorganize_pages') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ route('tool.rotate_pages') }}"><i class="bi bi-arrow-clockwise me-2 text-warning"></i>{{ __('messages.rotate_pages') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ route('tool.remove_pages') }}"><i class="bi bi-file-earmark-minus me-2 text-danger"></i>{{ __('messages.remove_pages') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ route('tool.extract_pages') }}"><i class="bi bi-file-earmark-break me-2 text-info"></i>{{ __('messages.extract_pages') }}</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><h6 class="dropdown-header text-primary fw-bold">{{ __('messages.cat_security') }}</h6></li>
+                        <li><a class="dropdown-item" href="{{ route('tool.unlock_pdf') }}"><i class="bi bi-unlock me-2 text-success"></i>{{ __('messages.unlock_pdf') }}</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><h6 class="dropdown-header text-primary fw-bold">{{ __('messages.cat_advanced') }}</h6></li>
+                        <li><a class="dropdown-item" href="{{ route('tool.add_watermark') }}"><i class="bi bi-droplet me-2 text-primary"></i>{{ __('messages.add_watermark') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ route('tool.add_page_numbers') }}"><i class="bi bi-123 me-2 text-secondary"></i>{{ __('messages.add_page_numbers') }}</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><h6 class="dropdown-header text-primary fw-bold">{{ __('messages.cat_convert') }}</h6></li>
                         <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-file-earmark-font me-2 text-danger"></i>{{ __('messages.convert_pdf') }}</a></li>

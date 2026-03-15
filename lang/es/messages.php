@@ -126,4 +126,14 @@ return [
     'add_range' => 'Añadir rango',
     'remove_range' => 'Eliminar',
     'split_download_info' => 'Las páginas se descargarán en un archivo ZIP.',
+
+    // Tool UI elements
+    'rotate_left' => 'Girar a la izquierda',
+    'rotate_right' => 'Girar a la derecha',
+    'remove_selected' => 'Eliminar seleccionadas',
+    'extract_selected' => 'Extraer seleccionadas',
+    'password' => 'Contraseña',
+    'enter_password' => 'Ingrese la contraseña',
+    'watermark_text' => 'Texto de la marca de agua',
+    'page_numbers' => 'Números de página',
 ];

@@ -126,4 +126,14 @@ return [
     'add_range' => 'Ajouter une plage',
     'remove_range' => 'Supprimer',
     'split_download_info' => 'Les pages seront téléchargées dans un fichier ZIP.',
+
+    // Tool UI elements
+    'rotate_left' => 'Pivoter à gauche',
+    'rotate_right' => 'Pivoter à droite',
+    'remove_selected' => 'Supprimer la sélection',
+    'extract_selected' => 'Extraire la sélection',
+    'password' => 'Mot de passe',
+    'enter_password' => 'Entrez le mot de passe',
+    'watermark_text' => 'Texte du filigrane',
+    'page_numbers' => 'Numéros de page',
 ];
