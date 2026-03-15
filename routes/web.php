@@ -37,4 +37,8 @@ Route::group([
         return view('tools.split');
     })->name('tool.split_pdf');
     
+    Route::get('/tool/reorganize-pdf', function () {
+        return view('tools.reorganize');
+    })->name('tool.reorganize_pages');
+    
 });

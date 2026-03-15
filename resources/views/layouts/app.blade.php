@@ -50,6 +50,8 @@
                         <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-arrows-angle-contract me-2 text-success"></i>{{ __('messages.compress_pdf') }}</a></li>
                         <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-pencil-square me-2 text-info"></i>{{ __('messages.edit_pdf') }}</a></li>
                         <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-pen me-2 text-secondary"></i>{{ __('messages.sign_pdf') }}</a></li>
+                        <li><h6 class="dropdown-header text-primary fw-bold">{{ __('messages.cat_manage') }}</h6></li>
+                        <li><a class="dropdown-item" href="{{ route('tool.reorganize_pages') }}"><i class="bi bi-shuffle me-2 text-purple"></i>{{ __('messages.reorganize_pages') }}</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><h6 class="dropdown-header text-primary fw-bold">{{ __('messages.cat_convert') }}</h6></li>
                         <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-file-earmark-font me-2 text-danger"></i>{{ __('messages.convert_pdf') }}</a></li>
