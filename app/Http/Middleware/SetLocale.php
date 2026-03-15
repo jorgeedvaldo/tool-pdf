@@ -18,8 +18,18 @@ class SetLocale
      */
     public function handle(Request $request, Closure $next)
     {
-        if (Session::has('locale')) {
-            App::setLocale(Session::get('locale'));
+        $locale = $request->segment(1);
+
+        if (in_array($locale, ['en', 'pt', 'es', 'fr', 'zh', 'hi', 'ru'])) {
+            App::setLocale($locale);
+            // Ensure all future route() calls include the current locale automatically
+            \Illuminate\Support\Facades\URL::defaults(['locale' => $locale]);
+            Session::put('locale', $locale);
+        } else {
+            // Fallback
+            $fallback = Session::get('locale', config('app.fallback_locale'));
+            App::setLocale($fallback);
+            \Illuminate\Support\Facades\URL::defaults(['locale' => $fallback]);
         }
 
         return $next($request);

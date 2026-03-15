@@ -13,21 +13,28 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Redirect the root domain to the default language (English) or session language
 Route::get('/', function () {
-    return view('home');
+    $locale = session('locale', 'en');
+    return redirect('/' . $locale);
 });
 
-Route::get('lang/{locale}', function ($locale) {
-    if (in_array($locale, ['en', 'pt', 'es', 'fr', 'zh', 'hi', 'ru'])) {
-        session()->put('locale', $locale);
-    }
-    return redirect()->back();
+// Group all routes under a {locale} prefix
+Route::group([
+    'prefix' => '{locale}',
+    'where' => ['locale' => '[a-zA-Z]{2}']
+], function () {
+    
+    Route::get('/', function () {
+        return view('home');
+    })->name('home');
+
+    Route::get('/tool/merge-pdf', function () {
+        return view('tools.merge');
+    })->name('tool.merge_pdf');
+
+    Route::get('/tool/split-pdf', function () {
+        return view('tools.split');
+    })->name('tool.split_pdf');
+    
 });
-
-Route::get('/tool/merge-pdf', function () {
-    return view('tools.merge');
-})->name('tool.merge_pdf');
-
-Route::get('/tool/split-pdf', function () {
-    return view('tools.split');
-})->name('tool.split_pdf');

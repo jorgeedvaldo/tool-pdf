@@ -18,7 +18,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-custom-dark shadow-sm">
     <div class="container">
-        <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}">
+        <a class="navbar-brand d-flex align-items-center" href="{{ route('home') }}">
             <i class="bi bi-file-earmark-pdf-fill text-danger me-2 fs-3"></i>
             <span class="fw-bold fs-4">ToolPDF</span>
         </a>
@@ -34,10 +34,10 @@
                     <a class="nav-link" href="{{ route('tool.split_pdf') }}"><i class="bi bi-layout-split me-1"></i>{{ __('messages.split_pdf') }}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url('/') }}"><i class="bi bi-arrows-angle-contract me-1"></i>{{ __('messages.compress_pdf') }}</a>
+                    <a class="nav-link" href="{{ route('home') }}"><i class="bi bi-arrows-angle-contract me-1"></i>{{ __('messages.compress_pdf') }}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url('/') }}"><i class="bi bi-file-earmark-font me-1"></i>{{ __('messages.convert_pdf') }}</a>
+                    <a class="nav-link" href="{{ route('home') }}"><i class="bi bi-file-earmark-font me-1"></i>{{ __('messages.convert_pdf') }}</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle fw-bold text-white" href="#" id="allToolsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -47,17 +47,17 @@
                         <li><h6 class="dropdown-header text-primary fw-bold">{{ __('messages.cat_manipulate') }}</h6></li>
                         <li><a class="dropdown-item" href="{{ route('tool.merge_pdf') }}"><i class="bi bi-file-earmark-plus me-2 text-primary"></i>{{ __('messages.merge_pdf') }}</a></li>
                         <li><a class="dropdown-item" href="{{ route('tool.split_pdf') }}"><i class="bi bi-layout-split me-2 text-warning"></i>{{ __('messages.split_pdf') }}</a></li>
-                        <li><a class="dropdown-item" href="{{ url('/') }}"><i class="bi bi-arrows-angle-contract me-2 text-success"></i>{{ __('messages.compress_pdf') }}</a></li>
-                        <li><a class="dropdown-item" href="{{ url('/') }}"><i class="bi bi-pencil-square me-2 text-info"></i>{{ __('messages.edit_pdf') }}</a></li>
-                        <li><a class="dropdown-item" href="{{ url('/') }}"><i class="bi bi-pen me-2 text-secondary"></i>{{ __('messages.sign_pdf') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-arrows-angle-contract me-2 text-success"></i>{{ __('messages.compress_pdf') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-pencil-square me-2 text-info"></i>{{ __('messages.edit_pdf') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-pen me-2 text-secondary"></i>{{ __('messages.sign_pdf') }}</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><h6 class="dropdown-header text-primary fw-bold">{{ __('messages.cat_convert') }}</h6></li>
-                        <li><a class="dropdown-item" href="{{ url('/') }}"><i class="bi bi-file-earmark-font me-2 text-danger"></i>{{ __('messages.convert_pdf') }}</a></li>
-                        <li><a class="dropdown-item" href="{{ url('/') }}"><i class="bi bi-images me-2 text-warning"></i>{{ __('messages.images_to_pdf') }}</a></li>
-                        <li><a class="dropdown-item" href="{{ url('/') }}"><i class="bi bi-file-earmark-image me-2 text-warning"></i>{{ __('messages.pdf_to_images') }}</a></li>
-                        <li><a class="dropdown-item" href="{{ url('/') }}"><i class="bi bi-globe me-2 text-info"></i>{{ __('messages.web_to_pdf') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-file-earmark-font me-2 text-danger"></i>{{ __('messages.convert_pdf') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-images me-2 text-warning"></i>{{ __('messages.images_to_pdf') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-file-earmark-image me-2 text-warning"></i>{{ __('messages.pdf_to_images') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-globe me-2 text-info"></i>{{ __('messages.web_to_pdf') }}</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item fw-bold text-center bg-light py-2" href="{{ url('/') }}#tools-section">{{ __('messages.tools') }}...</a></li>
+                        <li><a class="dropdown-item fw-bold text-center bg-light py-2" href="{{ route('home') }}#tools-section">{{ __('messages.tools') }}...</a></li>
                     </ul>
                 </li>
             </ul>
@@ -67,13 +67,17 @@
                         <i class="bi bi-globe me-1"></i> {{ strtoupper(app()->getLocale()) }}
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="languageDropdown">
-                        <li><a class="dropdown-item" href="{{ url('lang/en') }}">English (EN)</a></li>
-                        <li><a class="dropdown-item" href="{{ url('lang/pt') }}">Português (PT)</a></li>
-                        <li><a class="dropdown-item" href="{{ url('lang/es') }}">Español (ES)</a></li>
-                        <li><a class="dropdown-item" href="{{ url('lang/fr') }}">Français (FR)</a></li>
-                        <li><a class="dropdown-item" href="{{ url('lang/zh') }}">中文 (ZH)</a></li>
-                        <li><a class="dropdown-item" href="{{ url('lang/hi') }}">हिन्दी (HI)</a></li>
-                        <li><a class="dropdown-item" href="{{ url('lang/ru') }}">Русский (RU)</a></li>
+                        @php
+                            $currentRoute = Route::currentRouteName() ?? 'home';
+                            $params = request()->route() ? request()->route()->parameters() : [];
+                        @endphp
+                        <li><a class="dropdown-item" href="{{ route($currentRoute, array_merge($params, ['locale' => 'en'])) }}">English (EN)</a></li>
+                        <li><a class="dropdown-item" href="{{ route($currentRoute, array_merge($params, ['locale' => 'pt'])) }}">Português (PT)</a></li>
+                        <li><a class="dropdown-item" href="{{ route($currentRoute, array_merge($params, ['locale' => 'es'])) }}">Español (ES)</a></li>
+                        <li><a class="dropdown-item" href="{{ route($currentRoute, array_merge($params, ['locale' => 'fr'])) }}">Français (FR)</a></li>
+                        <li><a class="dropdown-item" href="{{ route($currentRoute, array_merge($params, ['locale' => 'zh'])) }}">中文 (ZH)</a></li>
+                        <li><a class="dropdown-item" href="{{ route($currentRoute, array_merge($params, ['locale' => 'hi'])) }}">हिन्दी (HI)</a></li>
+                        <li><a class="dropdown-item" href="{{ route($currentRoute, array_merge($params, ['locale' => 'ru'])) }}">Русский (RU)</a></li>
                     </ul>
                 </li>
             </ul>
