@@ -126,6 +126,7 @@ return [
     'add_range' => 'Ajouter une plage',
     'remove_range' => 'Supprimer',
     'split_download_info' => 'Les pages seront téléchargées dans un fichier ZIP.',
+    'blog' => 'Blog',
 
     // Tool UI elements
     'rotate_left' => 'Pivoter à gauche',

@@ -37,7 +37,7 @@
     <meta property="og:image:height" content="700" />
     <meta property="og:image:alt" content="ToolPDF Logo" />
     <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}" />
-    <meta name="author" content="Jorge Edvaldo" />
+    <meta name="author" content="Edivaldo" />
     <meta name="twitter:text:title" content="@yield('title', __('messages.title'))" />
     <meta name="twitter:image" content="{{ asset('img/logo.svg') }}" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -79,6 +79,9 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link fw-bold {{ Str::startsWith(Route::currentRouteName(), 'blog') ? 'active text-white' : '' }}" href="{{ route('blog.index', ['locale' => app()->getLocale()]) }}"><i class="bi bi-newspaper me-1"></i>{{ __('messages.blog') ?? 'Blog' }}</a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('tool.merge_pdf') }}"><i class="bi bi-file-earmark-plus me-1"></i>{{ __('messages.merge_pdf') }}</a>
                 </li>
@@ -163,6 +166,8 @@
             <li class="list-inline-item"><a href="{{ route('pages.terms') }}" class="text-white text-decoration-none small">{{ __('messages.terms') }}</a></li>
             <li class="list-inline-item text-muted">|</li>
             <li class="list-inline-item"><a href="{{ route('pages.legal') }}" class="text-white text-decoration-none small">{{ __('messages.legal') }}</a></li>
+            <li class="list-inline-item text-muted">|</li>
+            <li class="list-inline-item"><a href="{{ url('/jobs') }}" class="text-white text-decoration-none small fw-bold">Careers</a></li>
         </ul>
         <p class="mb-0 small text-muted">&copy; {{ __('messages.copyright') }}</p>
     </div>

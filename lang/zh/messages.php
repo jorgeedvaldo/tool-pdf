@@ -126,9 +126,14 @@ return [
     'add_range' => '添加范围',
     'remove_range' => '删除',
     'split_download_info' => '页面将作为ZIP文件下载。',
+    'blog' => '博客',
 
-    // New Tools
-    'unlock_password' => '解锁密码',
+    // Tool UI elements
+    'rotate_left' => '向左旋转',
+    'rotate_right' => '向右旋转',
+    'remove_selected' => '删除选中',
+    'extract_selected' => '提取选中',
+    'password' => '密码',
     'enter_password' => '输入密码',
     'watermark_text' => '水印文字',
     'page_numbers' => '页码',

@@ -126,6 +126,7 @@ return [
     'add_range' => 'Add range',
     'remove_range' => 'Remove',
     'split_download_info' => 'Pages will be downloaded in a ZIP file.',
+    'blog' => 'Blog',
 
     // Tool UI elements
     'rotate_left' => 'Rotate Left',

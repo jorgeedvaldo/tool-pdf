@@ -126,6 +126,7 @@ return [
     'add_range' => 'श्रेणी जोड़ें',
     'remove_range' => 'निकालें',
     'split_download_info' => 'पृष्ठों को एक ज़िप फ़ाइल में डाउनलोड किया जाएगा।',
+    'blog' => 'ब्लॉग',
 
     // Tool UI elements
     'rotate_left' => 'बाएं घुमाएं',

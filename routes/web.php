@@ -19,6 +19,14 @@ Route::get('/', function () {
     return redirect('/' . $locale);
 });
 
+Route::get('/linkstorage', function () {
+    // Cria o link simbólico (storage -> public)
+    Artisan::call('storage:link');
+    Artisan::call('migrate');
+    
+    return 'Symlink criado: <pre>' . Artisan::output() . '</pre>';
+});
+
 // Group all routes under a {locale} prefix
 Route::group([
     'prefix' => '{locale}',
@@ -101,4 +109,12 @@ Route::group([
     Route::get('/legal', function () {
         return view('pages.legal');
     })->name('pages.legal');
+
+    // Blog Pages
+    Route::get('/blog', [\App\Http\Controllers\PostController::class, 'index'])->name('blog.index');
+    Route::get('/blog/{slug}', [\App\Http\Controllers\PostController::class, 'show'])->name('blog.show');
 });
+
+// Jobs are English only, so they are outside the localized group
+Route::get('/jobs', [\App\Http\Controllers\JobController::class, 'index'])->name('jobs.index');
+Route::get('/jobs/{slug}', [\App\Http\Controllers\JobController::class, 'show'])->name('jobs.show');

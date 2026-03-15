@@ -126,9 +126,14 @@ return [
     'add_range' => 'Добавить диапазон',
     'remove_range' => 'Удалить',
     'split_download_info' => 'Страницы будут загружены в виде ZIP-файла.',
+    'blog' => 'Блог',
 
-    // New Tools
-    'unlock_password' => 'Пароль разблокировки',
+    // Tool UI elements
+    'rotate_left' => 'Повернуть влево',
+    'rotate_right' => 'Повернуть вправо',
+    'remove_selected' => 'Удалить выбранные',
+    'extract_selected' => 'Извлечь выбранные',
+    'password' => 'Пароль',
     'enter_password' => 'Введите пароль',
     'watermark_text' => 'Текст водяного знака',
     'page_numbers' => 'Номера страниц',

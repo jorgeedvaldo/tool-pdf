@@ -126,6 +126,7 @@ return [
     'add_range' => 'Adicionar intervalo',
     'remove_range' => 'Remover',
     'split_download_info' => 'As páginas serão descarregadas num ficheiro ZIP.',
+    'blog' => 'Blog',
 
     // Tool UI elements
     'rotate_left' => 'Girar à Esquerda',
