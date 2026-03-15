@@ -143,4 +143,14 @@ return [
     'save_signature' => 'Save & Apply',
     'page_to_sign' => 'Page to sign',
     'position_to_sign' => 'Signature Position',
+
+    // Info Pages
+    'about' => 'About Us',
+    'privacy' => 'Privacy Policy',
+    'terms' => 'Terms of Use',
+    'legal' => 'Legal Notice',
+    'about_content' => "ToolPDF is a free, fast, and secure online platform for all your PDF needs.\n\nOur mission is to provide accessible, high-quality digital tools without compromising user privacy. We believe that managing your documents should be simple and secure.\n\nUnlike traditional cloud services, ToolPDF leverages modern web technologies to process your files directly in your browser. This means your sensitive documents never leave your device, ensuring complete privacy.",
+    'privacy_content' => "Your privacy is our highest priority.\n\n**1. Data Processing**\nAll file processing happens locally in your web browser. We do not upload, store, or transmit your PDF files or their contents to any servers. Once you close the tab, the data is gone.\n\n**2. Analytics**\nWe may use standard, anonymous analytics to understand how our tools are used and to improve the user experience. No personally identifiable information or file metadata is collected.\n\n**3. Cookies**\nWe use essential cookies to maintain your language preferences and ensure the site functions correctly.",
+    'terms_content' => "**1. Acceptance of Terms**\nBy accessing and using ToolPDF, you accept and agree to be bound by the terms and provision of this agreement.\n\n**2. Use License**\nWe grant you a free, non-exclusive license to use our tools for personal or commercial purposes.\n\n**3. Disclaimer**\nThe materials on ToolPDF's website are provided on an 'as is' basis. ToolPDF makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property.\n\n**4. Limitations**\nIn no event shall ToolPDF or its suppliers be liable for any damages arising out of the use or inability to use our tools.",
+    'legal_content' => "ToolPDF is provided as a free service.\n\n**Copyright**\nThe website layout, design, and original code are copyright of ToolPDF. All respective trademarks and libraries used (such as pdf-lib, pdf.js) belong to their respective owners.\n\n**Contact**\nFor inquiries, please contact us via our official channels.",
 ];

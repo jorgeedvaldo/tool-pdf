@@ -77,4 +77,20 @@ Route::group([
         return view('tools.add_page_numbers');
     })->name('tool.add_page_numbers');
 
+    // Info Pages
+    Route::get('/about', function () {
+        return view('pages.about');
+    })->name('pages.about');
+
+    Route::get('/privacy', function () {
+        return view('pages.privacy');
+    })->name('pages.privacy');
+
+    Route::get('/terms', function () {
+        return view('pages.terms');
+    })->name('pages.terms');
+
+    Route::get('/legal', function () {
+        return view('pages.legal');
+    })->name('pages.legal');
 });

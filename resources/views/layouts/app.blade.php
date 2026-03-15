@@ -103,7 +103,16 @@
 
 <footer class="bg-custom-dark text-white text-center py-4 mt-auto">
     <div class="container">
-        <p class="mb-0">&copy; {{ __('messages.copyright') }}</p>
+        <ul class="list-inline mb-2">
+            <li class="list-inline-item"><a href="{{ route('pages.about') }}" class="text-white text-decoration-none small">{{ __('messages.about') }}</a></li>
+            <li class="list-inline-item text-muted">|</li>
+            <li class="list-inline-item"><a href="{{ route('pages.privacy') }}" class="text-white text-decoration-none small">{{ __('messages.privacy') }}</a></li>
+            <li class="list-inline-item text-muted">|</li>
+            <li class="list-inline-item"><a href="{{ route('pages.terms') }}" class="text-white text-decoration-none small">{{ __('messages.terms') }}</a></li>
+            <li class="list-inline-item text-muted">|</li>
+            <li class="list-inline-item"><a href="{{ route('pages.legal') }}" class="text-white text-decoration-none small">{{ __('messages.legal') }}</a></li>
+        </ul>
+        <p class="mb-0 small text-muted">&copy; {{ __('messages.copyright') }}</p>
     </div>
 </footer>
 

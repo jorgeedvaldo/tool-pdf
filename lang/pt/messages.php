@@ -143,4 +143,14 @@ return [
     'save_signature' => 'Guardar e Aplicar',
     'page_to_sign' => 'Página a assinar',
     'position_to_sign' => 'Posição da Assinatura',
+
+    // Info Pages
+    'about' => 'Sobre Nós',
+    'privacy' => 'Política de Privacidade',
+    'terms' => 'Termos de Uso',
+    'legal' => 'Aviso Legal',
+    'about_content' => "A ToolPDF é uma plataforma online gratuita, rápida e segura para todas as suas necessidades de PDF.\n\nA nossa missão é fornecer ferramentas digitais acessíveis e de alta qualidade sem comprometer a privacidade do utilizador. Acreditamos que gerir os seus documentos deve ser simples e seguro.\n\nAo contrário dos serviços tradicionais na nuvem, a ToolPDF utiliza tecnologias web modernas para processar os seus ficheiros diretamente no seu navegador. Isto significa que os seus documentos sensíveis nunca saem do seu dispositivo, garantindo total privacidade.",
+    'privacy_content' => "A sua privacidade é a nossa maior prioridade.\n\n**1. Processamento de Dados**\nTodo o processamento de ficheiros ocorre localmente no seu navegador web. Não carregamos, armazenamos ou transmitimos os seus ficheiros PDF ou os seus conteúdos para quaisquer servidores. Assim que fecha o separador, os dados desaparecem.\n\n**2. Analíticas**\nPodemos utilizar analíticas padrão e anónimas para compreender como as nossas ferramentas são utilizadas e melhorar a experiência do utilizador. Nenhuma informação pessoal identificável ou metadados de ficheiros são recolhidos.\n\n**3. Cookies**\nUtilizamos cookies essenciais para manter as suas preferências de idioma e garantir que o site funcione corretamente.",
+    'terms_content' => "**1. Aceitação dos Termos**\nAo aceder e utilizar a ToolPDF, aceita e concorda em ficar vinculado aos termos e disposições deste acordo.\n\n**2. Licença de Uso**\nConcedemos-lhe uma licença gratuita e não exclusiva para utilizar as nossas ferramentas para fins pessoais ou comerciais.\n\n**3. Isenção de Responsabilidade**\nOs materiais no website da ToolPDF são fornecidos 'tal como estão'. A ToolPDF não oferece garantias, expressas ou implícitas, e por este meio isenta e nega todas as outras garantias, incluindo, sem limitação, garantias implícitas ou condições de comercialização, adequação a um fim específico, ou não violação de propriedade intelectual.\n\n**4. Limitações**\nEm nenhum caso a ToolPDF ou os seus fornecedores serão responsáveis por quaisquer danos decorrentes do uso ou incapacidade de usar as nossas ferramentas.",
+    'legal_content' => "A ToolPDF é fornecida como um serviço gratuito.\n\n**Direitos de Autor**\nO layout do site, design e código original são direitos de autor da ToolPDF. Todas as marcas registadas e bibliotecas utilizadas (como pdf-lib, pdf.js) pertencem aos seus respetivos proprietários.\n\n**Contacto**\nPara questões, por favor contacte-nos através dos nossos canais oficiais.",
 ];
