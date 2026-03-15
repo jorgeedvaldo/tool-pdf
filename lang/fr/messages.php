@@ -136,4 +136,11 @@ return [
     'enter_password' => 'Entrez le mot de passe',
     'watermark_text' => 'Texte du filigrane',
     'page_numbers' => 'Numéros de page',
+
+    // Sign PDF UI
+    'draw_signature' => 'Dessinez votre signature',
+    'clear_signature' => 'Effacer',
+    'save_signature' => 'Enregistrer et appliquer',
+    'page_to_sign' => 'Page à signer',
+    'position_to_sign' => 'Position de la signature',
 ];

@@ -136,4 +136,11 @@ return [
     'enter_password' => 'Ingrese la contraseña',
     'watermark_text' => 'Texto de la marca de agua',
     'page_numbers' => 'Números de página',
+
+    // Sign PDF UI
+    'draw_signature' => 'Dibuja tu firma',
+    'clear_signature' => 'Limpiar',
+    'save_signature' => 'Guardar y aplicar',
+    'page_to_sign' => 'Página a firmar',
+    'position_to_sign' => 'Posición de la firma',
 ];

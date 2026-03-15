@@ -29,6 +29,10 @@ Route::group([
         return view('home');
     })->name('home');
 
+    Route::get('/tool/sign-pdf', function () {
+        return view('tools.sign_pdf');
+    })->name('tool.sign_pdf');
+
     Route::get('/tool/merge-pdf', function () {
         return view('tools.merge');
     })->name('tool.merge_pdf');

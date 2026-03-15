@@ -136,4 +136,11 @@ return [
     'enter_password' => 'Enter Password',
     'watermark_text' => 'Watermark Text',
     'page_numbers' => 'Page Numbers',
+    
+    // Sign PDF UI
+    'draw_signature' => 'Draw your signature',
+    'clear_signature' => 'Clear',
+    'save_signature' => 'Save & Apply',
+    'page_to_sign' => 'Page to sign',
+    'position_to_sign' => 'Signature Position',
 ];

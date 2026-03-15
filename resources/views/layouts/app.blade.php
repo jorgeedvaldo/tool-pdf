@@ -49,7 +49,7 @@
                         <li><a class="dropdown-item" href="{{ route('tool.split_pdf') }}"><i class="bi bi-layout-split me-2 text-warning"></i>{{ __('messages.split_pdf') }}</a></li>
                         <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-arrows-angle-contract me-2 text-success"></i>{{ __('messages.compress_pdf') }}</a></li>
                         <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-pencil-square me-2 text-info"></i>{{ __('messages.edit_pdf') }}</a></li>
-                        <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-pen me-2 text-secondary"></i>{{ __('messages.sign_pdf') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ route('tool.sign_pdf') }}"><i class="bi bi-pen me-2 text-secondary"></i>{{ __('messages.sign_pdf') }}</a></li>
                         <li><h6 class="dropdown-header text-primary fw-bold">{{ __('messages.cat_manage') }}</h6></li>
                         <li><a class="dropdown-item" href="{{ route('tool.reorganize_pages') }}"><i class="bi bi-shuffle me-2 text-purple"></i>{{ __('messages.reorganize_pages') }}</a></li>
                         <li><a class="dropdown-item" href="{{ route('tool.rotate_pages') }}"><i class="bi bi-arrow-clockwise me-2 text-warning"></i>{{ __('messages.rotate_pages') }}</a></li>

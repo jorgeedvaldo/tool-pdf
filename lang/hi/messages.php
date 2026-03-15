@@ -136,4 +136,11 @@ return [
     'enter_password' => 'पासवर्ड दर्ज करें',
     'watermark_text' => 'वाटरमार्क पाठ',
     'page_numbers' => 'पृष्ठ संख्या',
+
+    // Sign PDF UI
+    'draw_signature' => 'अपना हस्ताक्षर खींचें',
+    'clear_signature' => 'साफ करें',
+    'save_signature' => 'सहेजें और लागू करें',
+    'page_to_sign' => 'हस्ताक्षर करने के लिए पृष्ठ',
+    'position_to_sign' => 'हस्ताक्षर की स्थिति',
 ];
