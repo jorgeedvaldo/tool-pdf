@@ -23,6 +23,30 @@
 
     gtag('config', 'G-24XTW9LKS1');
     </script>
+    <!-- JSON-LD SEO Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "{{ __('messages.title') }}",
+      "url": "{{ url('/') }}"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "url": "{{ url('/') }}",
+      "logo": "{{ asset('img/logo.svg') }}",
+      "name": "ToolPDF",
+      "description": "{{ __('messages.subtitle') }}",
+      "email": "contact@toolpdf.org",
+      "sameAs": [
+        "https://twitter.com/toolpdf",
+        "https://github.com/jorgeedvaldo/tool-pdf"
+      ]
+    }
+    </script>
 </head>
 <body>
 
