@@ -77,6 +77,14 @@ Route::group([
         return view('tools.add_page_numbers');
     })->name('tool.add_page_numbers');
 
+    Route::get('/tool/edit-pdf', function () {
+        return view('tools.edit_pdf');
+    })->name('tool.edit_pdf');
+
+    Route::get('/tool/overlay-pdfs', function () {
+        return view('tools.overlay_pdfs');
+    })->name('tool.overlay_pdfs');
+
     // Info Pages
     Route::get('/about', function () {
         return view('pages.about');
