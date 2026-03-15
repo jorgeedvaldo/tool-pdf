@@ -28,10 +28,37 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{{ url('/') }}">{{ __('messages.home') }}</a>
+                    <a class="nav-link" href="{{ url('/') }}"><i class="bi bi-file-earmark-plus me-1"></i>{{ __('messages.merge_pdf') }}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#tools-section">{{ __('messages.tools') }}</a>
+                    <a class="nav-link" href="{{ url('/') }}"><i class="bi bi-layout-split me-1"></i>{{ __('messages.split_pdf') }}</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/') }}"><i class="bi bi-arrows-angle-contract me-1"></i>{{ __('messages.compress_pdf') }}</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url('/') }}"><i class="bi bi-file-earmark-font me-1"></i>{{ __('messages.convert_pdf') }}</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle fw-bold text-white" href="#" id="allToolsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-grid-3x3-gap-fill me-1"></i>{{ __('messages.tools') }}
+                    </a>
+                    <ul class="dropdown-menu shadow-lg border-0 mt-2" aria-labelledby="allToolsDropdown">
+                        <li><h6 class="dropdown-header text-primary fw-bold">{{ __('messages.cat_manipulate') }}</h6></li>
+                        <li><a class="dropdown-item" href="{{ url('/') }}"><i class="bi bi-file-earmark-plus me-2 text-primary"></i>{{ __('messages.merge_pdf') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ url('/') }}"><i class="bi bi-layout-split me-2 text-warning"></i>{{ __('messages.split_pdf') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ url('/') }}"><i class="bi bi-arrows-angle-contract me-2 text-success"></i>{{ __('messages.compress_pdf') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ url('/') }}"><i class="bi bi-pencil-square me-2 text-info"></i>{{ __('messages.edit_pdf') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ url('/') }}"><i class="bi bi-pen me-2 text-secondary"></i>{{ __('messages.sign_pdf') }}</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><h6 class="dropdown-header text-primary fw-bold">{{ __('messages.cat_convert') }}</h6></li>
+                        <li><a class="dropdown-item" href="{{ url('/') }}"><i class="bi bi-file-earmark-font me-2 text-danger"></i>{{ __('messages.convert_pdf') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ url('/') }}"><i class="bi bi-images me-2 text-warning"></i>{{ __('messages.images_to_pdf') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ url('/') }}"><i class="bi bi-file-earmark-image me-2 text-warning"></i>{{ __('messages.pdf_to_images') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ url('/') }}"><i class="bi bi-globe me-2 text-info"></i>{{ __('messages.web_to_pdf') }}</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item fw-bold text-center bg-light py-2" href="{{ url('/') }}#tools-section">{{ __('messages.tools') }}...</a></li>
+                    </ul>
                 </li>
             </ul>
             <ul class="navbar-nav">
