@@ -35,7 +35,7 @@ If you'd like to work on this project locally, make sure you have PHP, Composer,
 
 1. **Clone the generic repository**:
    ```bash
-   git clone https://github.com/yourusername/toolpdf.git
+   git clone https://github.com/jorgeedvaldo/toolpdf.git
    cd toolpdf
    ```
 

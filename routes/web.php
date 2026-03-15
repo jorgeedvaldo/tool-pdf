@@ -41,4 +41,12 @@ Route::group([
         return view('tools.reorganize');
     })->name('tool.reorganize_pages');
     
+    Route::get('/tool/pdf-to-images', function () {
+        return view('tools.pdf_to_images');
+    })->name('tool.pdf_to_images');
+    
+    Route::get('/tool/images-to-pdf', function () {
+        return view('tools.images_to_pdf');
+    })->name('tool.images_to_pdf');
+
 });
