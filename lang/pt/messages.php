@@ -127,6 +127,10 @@ return [
     'remove_range' => 'Remover',
     'split_download_info' => 'As páginas serão descarregadas num ficheiro ZIP.',
     'blog' => 'Blog',
+    'all' => 'Todas',
+    'latest_articles' => 'Últimos Artigos',
+    'view_all_articles' => 'Ver todos os artigos',
+    'read_more' => 'Ler Mais',
 
     // Tool UI elements
     'rotate_left' => 'Girar à Esquerda',

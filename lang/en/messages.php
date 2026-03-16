@@ -127,6 +127,10 @@ return [
     'remove_range' => 'Remove',
     'split_download_info' => 'Pages will be downloaded in a ZIP file.',
     'blog' => 'Blog',
+    'all' => 'All',
+    'latest_articles' => 'Latest Articles',
+    'view_all_articles' => 'View all articles',
+    'read_more' => 'Read more',
 
     // Tool UI elements
     'rotate_left' => 'Rotate Left',

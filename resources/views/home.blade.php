@@ -89,13 +89,15 @@
     @endphp
 
     <!-- Category Filter Pills -->
-    <div class="category-filters d-flex justify-content-center flex-wrap gap-2 mb-5">
-        <button class="btn btn-primary rounded-pill px-4 filter-btn active" data-filter="all">{{ __('messages.all') ?? 'Todas' }}</button>
-        @foreach($categories as $category)
-            <button class="btn btn-outline-secondary rounded-pill px-4 filter-btn" data-filter="{{ 'cat_' . Str::slug($category['name']) }}">
-                {{ $category['name'] }}
-            </button>
-        @endforeach
+    <div class="category-filters text-center mb-5">
+        <div class="d-inline-flex flex-wrap justify-content-center gap-2 p-2 bg-white rounded-pill shadow-sm border">
+            <button class="btn btn-dark rounded-pill px-4 py-1 filter-btn active" data-filter="all">{{ __('messages.all') ?? 'Todas' }}</button>
+            @foreach($categories as $category)
+                <button class="btn btn-light rounded-pill px-4 py-1 filter-btn border-0 text-muted" data-filter="{{ 'cat_' . Str::slug($category['name']) }}">
+                    {{ $category['name'] }}
+                </button>
+            @endforeach
+        </div>
     </div>
 
     <!-- Tools Grid -->
@@ -262,8 +264,8 @@
     @if(isset($recentPosts) && $recentPosts->count() > 0)
     <div class="blog-section mt-5 pt-4 border-top">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold mb-0 d-inline-block">{{ __('messages.latest_articles') ?? 'Latest Articles' }}</h2>
-            <a href="{{ route('blog.index') }}" class="btn btn-outline-primary rounded-pill px-4">{{ __('messages.view_all_articles') ?? 'Ver todos os artigos' }}</a>
+            <h2 class="fw-bold mb-0 d-inline-block">{{ __('messages.latest_articles') }}</h2>
+            <a href="{{ route('blog.index') }}" class="btn btn-outline-dark rounded-pill px-4">{{ __('messages.view_all_articles') }}</a>
         </div>
 
         <div class="row g-4 mb-5">
@@ -282,7 +284,7 @@
                         <p class="card-text text-muted small">{{ Str::limit(strip_tags($post->description), 100) }}</p>
                     </div>
                     <div class="card-footer bg-white border-top-0 pb-3">
-                        <a href="{{ route('blog.show', ['slug' => $post->slug]) }}" class="btn btn-sm btn-primary w-100">{{ __('messages.read_more') ?? 'Ler Mais' }}</a>
+                        <a href="{{ route('blog.show', ['slug' => $post->slug]) }}" class="btn btn-sm btn-dark w-100 rounded-pill">{{ __('messages.read_more') }}</a>
                     </div>
                 </div>
             </div>
@@ -300,24 +302,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
     filterBtns.forEach(btn => {
         btn.addEventListener('click', function() {
-            // Remove active class from all
-            filterBtns.forEach(b => b.classList.remove('active', 'btn-primary'));
-            filterBtns.forEach(b => b.classList.add('btn-outline-secondary'));
+            // Remove active classes
+            filterBtns.forEach(b => {
+                b.classList.remove('active', 'btn-dark', 'text-white');
+                b.classList.add('btn-light', 'text-muted');
+            });
             
-            // Add active class to clicked
-            this.classList.remove('btn-outline-secondary');
-            this.classList.add('active', 'btn-primary');
+            // Add active classes to clicked
+            this.classList.remove('btn-light', 'text-muted');
+            this.classList.add('active', 'btn-dark', 'text-white');
 
             const filterValue = this.getAttribute('data-filter');
 
             toolItems.forEach(item => {
                 if (filterValue === 'all') {
-                    item.style.display = 'block';
+                    item.classList.remove('d-none');
                 } else {
                     if (item.getAttribute('data-category') === filterValue) {
-                        item.style.display = 'block';
+                        item.classList.remove('d-none');
                     } else {
-                        item.style.display = 'none';
+                        item.classList.add('d-none');
                     }
                 }
             });
