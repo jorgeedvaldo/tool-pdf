@@ -28,7 +28,7 @@ class PostResource extends Resource
                 Forms\Components\Grid::make(1)
                     ->schema([
                         Forms\Components\TextInput::make('title')->required(),
-                        Forms\Components\TextInput::make('slug')->required(),
+                        //Forms\Components\TextInput::make('slug')->required(),
                         Forms\Components\Select::make('language')
                             ->options([
                                 'en' => 'English',
