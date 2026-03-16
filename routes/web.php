@@ -39,7 +39,12 @@ Route::group([
 ], function () {
     
     Route::get('/', function () {
-        return view('home');
+        $locale = session('locale', 'en');
+        $recentPosts = \App\Models\Post::where('language', $locale)
+                           ->orderBy('created_at', 'desc')
+                           ->take(3)
+                           ->get();
+        return view('home', compact('recentPosts'));
     })->name('home');
 
     Route::get('/tool/sign-pdf', function () {
@@ -123,3 +128,5 @@ Route::group([
 // Jobs are English only, so they are outside the localized group
 Route::get('/jobs', [\App\Http\Controllers\JobController::class, 'index'])->name('jobs.index');
 Route::get('/jobs/{slug}', [\App\Http\Controllers\JobController::class, 'show'])->name('jobs.show');
+
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index']);

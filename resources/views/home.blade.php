@@ -88,30 +88,37 @@
     ];
     @endphp
 
-    @foreach($categories as $category)
-        <div class="mb-5 category-section">
-            <h3 class="category-title mb-4 bg-primary text-white p-2 rounded shadow-sm d-inline-block">
-                <i class="bi {{ $category['icon'] }} me-2"></i>{{ $category['name'] }}
-            </h3>
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-                @foreach($category['tools'] as $tool)
-                    <div class="col">
-                        <a href="{{ Route::has('tool.'.$tool['id']) ? route('tool.'.$tool['id']) : '#' }}" class="text-decoration-none">
-                            <div class="card h-100 tool-card shadow-retro border-pattern">
-                                <div class="card-body text-center d-flex flex-column justify-content-center">
-                                    <div class="icon-wrapper mb-3 mx-auto gradient-{{ $tool['color'] }}">
-                                        <i class="bi {{ $tool['icon'] }} fs-1 text-white text-shadow-sm"></i>
-                                    </div>
-                                    <h5 class="card-title fw-bold text-dark mb-2">{{ __('messages.'.$tool['id']) }}</h5>
-                                    <p class="card-text text-muted small">{{ __('messages.'.$tool['id'].'_desc') }}</p>
+    <!-- Category Filter Pills -->
+    <div class="category-filters d-flex justify-content-center flex-wrap gap-2 mb-5">
+        <button class="btn btn-primary rounded-pill px-4 filter-btn active" data-filter="all">{{ __('messages.all') ?? 'Todas' }}</button>
+        @foreach($categories as $category)
+            <button class="btn btn-outline-secondary rounded-pill px-4 filter-btn" data-filter="{{ 'cat_' . Str::slug($category['name']) }}">
+                {{ $category['name'] }}
+            </button>
+        @endforeach
+    </div>
+
+    <!-- Tools Grid -->
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-5" id="tools-grid">
+        @foreach($categories as $category)
+            @php $catId = 'cat_' . Str::slug($category['name']); @endphp
+            @foreach($category['tools'] as $tool)
+                <div class="col tool-item" data-category="{{ $catId }}">
+                    <a href="{{ Route::has('tool.'.$tool['id']) ? route('tool.'.$tool['id']) : '#' }}" class="text-decoration-none">
+                        <div class="card h-100 tool-card shadow-retro border-pattern">
+                            <div class="card-body text-center d-flex flex-column justify-content-center">
+                                <div class="icon-wrapper mb-3 mx-auto gradient-{{ $tool['color'] }}">
+                                    <i class="bi {{ $tool['icon'] }} fs-1 text-white text-shadow-sm"></i>
                                 </div>
+                                <h5 class="card-title fw-bold text-dark mb-2">{{ __('messages.'.$tool['id']) }}</h5>
+                                <p class="card-text text-muted small">{{ __('messages.'.$tool['id'].'_desc') }}</p>
                             </div>
-                        </a>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    @endforeach
+                        </div>
+                    </a>
+                </div>
+            @endforeach
+        @endforeach
+    </div>
 
     <!-- Informational Section matching 2013 style -->
     <div class="info-section mt-5 pt-4 border-top">
@@ -250,6 +257,74 @@
         </div>
 
     </div>
+
+    <!-- Blog Section -->
+    @if(isset($recentPosts) && $recentPosts->count() > 0)
+    <div class="blog-section mt-5 pt-4 border-top">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0 d-inline-block">{{ __('messages.latest_articles') ?? 'Latest Articles' }}</h2>
+            <a href="{{ route('blog.index') }}" class="btn btn-outline-primary rounded-pill px-4">{{ __('messages.view_all_articles') ?? 'Ver todos os artigos' }}</a>
+        </div>
+
+        <div class="row g-4 mb-5">
+            @foreach($recentPosts as $post)
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border rounded">
+                    @if($post->image)
+                        <img src="{{ asset('storage/' . $post->image) }}" class="card-img-top" alt="{{ $post->title }}" style="height: 200px; object-fit: cover;">
+                    @else
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="bi bi-image text-muted fs-1"></i>
+                        </div>
+                    @endif
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold"><a href="{{ route('blog.show', ['slug' => $post->slug]) }}" class="text-dark text-decoration-none">{{ $post->title }}</a></h5>
+                        <p class="card-text text-muted small">{{ Str::limit(strip_tags($post->description), 100) }}</p>
+                    </div>
+                    <div class="card-footer bg-white border-top-0 pb-3">
+                        <a href="{{ route('blog.show', ['slug' => $post->slug]) }}" class="btn btn-sm btn-primary w-100">{{ __('messages.read_more') ?? 'Ler Mais' }}</a>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const toolItems = document.querySelectorAll('.tool-item');
+
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remove active class from all
+            filterBtns.forEach(b => b.classList.remove('active', 'btn-primary'));
+            filterBtns.forEach(b => b.classList.add('btn-outline-secondary'));
+            
+            // Add active class to clicked
+            this.classList.remove('btn-outline-secondary');
+            this.classList.add('active', 'btn-primary');
+
+            const filterValue = this.getAttribute('data-filter');
+
+            toolItems.forEach(item => {
+                if (filterValue === 'all') {
+                    item.style.display = 'block';
+                } else {
+                    if (item.getAttribute('data-category') === filterValue) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                }
+            });
+        });
+    });
+});
+</script>
+@endpush
 
 @endsection
