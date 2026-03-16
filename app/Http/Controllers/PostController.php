@@ -18,9 +18,8 @@ class PostController extends Controller
         return view('posts.index', compact('posts'));
     }
 
-    public function show($slug)
+    public function show($locale, $slug)
     {
-        $locale = App::getLocale();
         $post = Post::where('slug', $slug)->where('language', $locale)->firstOrFail();
         
         $recentPosts = Post::where('language', $locale)
