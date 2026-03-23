@@ -36,6 +36,19 @@
     </div>
 </div>
 
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <!-- SEO Article -->
+            <div class="card shadow-sm border-0 bg-white">
+                <div class="card-body p-4 p-md-5 text-start">
+                    {!! __('messages.article_merge_content') !!}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {

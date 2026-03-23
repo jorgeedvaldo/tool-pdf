@@ -96,6 +96,19 @@
     </div>
 </template>
 
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <!-- SEO Article -->
+            <div class="card shadow-sm border-0 bg-white">
+                <div class="card-body p-4 p-md-5 text-start">
+                    {!! __('messages.article_split_content') !!}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <!-- Using JSZip to optionally zip the split files could be good, but we'll download one by one for simplicity if low page count, or zip if we add jszip later. -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
