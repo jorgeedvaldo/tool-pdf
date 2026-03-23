@@ -108,6 +108,14 @@
             <div class="mt-4 text-center text-muted col-8 mx-auto">
                 <p class="small"><i class="bi bi-shield-check text-success me-1"></i> Privacy guaranteed. Document processing happens entirely within your web browser. No files are uploaded to our servers.</p>
             </div>
+            
+            <!-- SEO Article -->
+            <div class="mt-5 card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5 text-start">
+                    {!! __('messages.article_images_to_pdf_content') !!}
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
