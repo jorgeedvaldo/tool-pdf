@@ -1,12 +1,28 @@
 <?php echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd http://www.google.com/schemas/sitemap-image/1.1 http://www.google.com/schemas/sitemap-image/1.1/sitemap-image.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
+    <!-- Home Page -->
+    <url>
+        <loc>{{url('/'.$lang)}}</loc>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+    </url>
+
     <!-- Static Pages -->
     @foreach ($staticPages as $page)
     <url>
         <loc>{{url($page)}}</loc>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
+    </url>
+    @endforeach
+
+    <!-- Tools -->
+    @foreach ($tools as $tool)
+    <url>
+        <loc>{{url($tool)}}</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
     </url>
     @endforeach
 
@@ -39,9 +55,9 @@
     <!-- Tool Categories (Anchor link on index) -->
     @foreach ($categories as $category)
     <url>
-        <loc>{{url('/en#'. $category['slug'])}}</loc>
-        <changefreq>daily</changefreq>
-        <priority>0.8</priority>
+        <loc>{{url('/'.$lang.'#'. $category['slug'])}}</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
     </url>
     @endforeach
 </urlset>

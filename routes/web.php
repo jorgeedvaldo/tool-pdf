@@ -130,4 +130,5 @@ Route::get('/jobs', [\App\Http\Controllers\JobController::class, 'index'])->name
 Route::get('/jobs/{slug}', [\App\Http\Controllers\JobController::class, 'show'])->name('jobs.show');
 
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index']);
+Route::get('/sitemap/{lang}.xml', [\App\Http\Controllers\SitemapController::class, 'show'])->where('lang', '[a-zA-Z]{2}');
 Route::get('/feed', [\App\Http\Controllers\FeedController::class, 'index']);
