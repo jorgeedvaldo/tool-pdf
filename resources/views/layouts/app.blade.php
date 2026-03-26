@@ -65,6 +65,41 @@
       ]
     }
     </script>
+    @if(Route::currentRouteName() && Str::startsWith(Route::currentRouteName(), 'tool.'))
+    @php
+        $toolKey = str_replace('tool.', '', Route::currentRouteName());
+    @endphp
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "{{ url()->current() }}"
+      },
+      "headline": "{{ __('messages.' . $toolKey) }}",
+      "description": "{{ __('messages.' . $toolKey . '_desc') }}",
+      "image": [
+        "{{ asset('img/logo.svg') }}"
+      ],
+      "datePublished": "2023-01-01T08:00:00+08:00",
+      "dateModified": "{{ date('c') }}",
+      "author": {
+        "@type": "Person",
+        "name": "Edivaldo",
+        "url": "{{ url('/') }}"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "ToolPDF",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "{{ asset('img/logo.svg') }}"
+        }
+      }
+    }
+    </script>
+    @endif
 </head>
 <body>
 
