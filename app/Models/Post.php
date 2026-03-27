@@ -21,27 +21,22 @@ class Post extends Model
         static::creating(function ($post) {
             $post->slug = $post->generateSlug($post->title, $post->id);
             $post->save(); // NOTE: this was here but calling save() inside creating() causes infinite loops or double inserts
+
+            if (empty($post->image)) {
+                try {
+                    $imageController = new \App\Http\Controllers\ArticleImageController();
+                    $post->image = $imageController->generate($post->title);
+                    $post->save();
+                }
+                catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Image generation failed: ' . $e->getMessage());
+                }
+            }
         });
 
         static::updating(function ($post) {
             if (empty($post->slug)) {
                 $post->slug = \Illuminate\Support\Str::slug($post->title);
-            }
-        });
-    }
-
-    protected static function booted()
-    {
-        static::created(function ($post) {
-            if (empty($post->image)) {
-                try {
-                    $imageController = new \App\Http\Controllers\ArticleImageController();
-                    $post->image = $imageController->generate($post->title);
-                    $post->saveQuietly();
-                }
-                catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('Image generation failed: ' . $e->getMessage());
-                }
             }
         });
     }
