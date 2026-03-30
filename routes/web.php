@@ -103,6 +103,10 @@ Route::group([
         return view('tools.overlay_pdfs');
     })->name('tool.overlay_pdfs');
 
+    Route::get('/tool/pdf-ocr', function () {
+        return view('tools.pdf_ocr');
+    })->name('tool.pdf_ocr');
+
     // Info Pages
     Route::get('/about', function () {
         return view('pages.about');
