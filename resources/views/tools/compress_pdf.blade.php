@@ -259,4 +259,18 @@
         });
     });
 </script>
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            @if(Lang::has('messages.article_compress_pdf_content'))
+            <div class="card shadow-sm border-0 bg-white">
+                <div class="card-body p-4 p-md-5 text-start">
+                    {!! __('messages.article_compress_pdf_content') !!}
+                </div>
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
 @endsection
