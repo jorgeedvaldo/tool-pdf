@@ -59,6 +59,10 @@ Route::group([
         return view('tools.split');
     })->name('tool.split_pdf');
     
+    Route::get('/tool/compress-pdf', function () {
+        return view('tools.compress_pdf');
+    })->name('tool.compress_pdf');
+    
     Route::get('/tool/reorganize-pdf', function () {
         return view('tools.reorganize');
     })->name('tool.reorganize_pages');
