@@ -37,29 +37,29 @@ class SitemapController extends Controller
             "{$lang}/tool/sign-pdf",
             "{$lang}/tool/merge-pdf",
             "{$lang}/tool/split-pdf",
+            "{$lang}/tool/compress-pdf",
             "{$lang}/tool/reorganize-pdf",
             "{$lang}/tool/pdf-to-images",
             "{$lang}/tool/images-to-pdf",
             "{$lang}/tool/rotate-pdf",
             "{$lang}/tool/remove-pages",
             "{$lang}/tool/extract-pages",
+            "{$lang}/tool/protect-pdf",
             "{$lang}/tool/unlock-pdf",
             "{$lang}/tool/add-watermark",
             "{$lang}/tool/add-page-numbers",
             "{$lang}/tool/edit-pdf",
             "{$lang}/tool/overlay-pdfs",
+            "{$lang}/tool/pdf-ocr",
         ];
 
         // Categories from home page
         $categories = [
             ['slug' => 'cat_manipulate'],
             ['slug' => 'cat_convert'],
-            ['slug' => 'cat_image'],
             ['slug' => 'cat_security'],
             ['slug' => 'cat_manage'],
             ['slug' => 'cat_advanced'],
-            ['slug' => 'cat_optimize'],
-            ['slug' => 'cat_create'],
         ];
 
         return response()->view('sitemap', [
