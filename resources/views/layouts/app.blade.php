@@ -148,6 +148,7 @@
                         <li><a class="dropdown-item" href="{{ route('tool.extract_pages') }}"><i class="bi bi-file-earmark-break me-2 text-info"></i>{{ __('messages.extract_pages') }}</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><h6 class="dropdown-header text-primary fw-bold">{{ __('messages.cat_security') }}</h6></li>
+                        <li><a class="dropdown-item" href="{{ route('tool.protect_pdf') }}"><i class="bi bi-lock me-2 text-secondary"></i>{{ __('messages.protect_pdf') }}</a></li>
                         <li><a class="dropdown-item" href="{{ route('tool.unlock_pdf') }}"><i class="bi bi-unlock me-2 text-success"></i>{{ __('messages.unlock_pdf') }}</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><h6 class="dropdown-header text-primary fw-bold">{{ __('messages.cat_advanced') }}</h6></li>

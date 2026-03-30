@@ -83,6 +83,10 @@ Route::group([
         return view('tools.extract_pages');
     })->name('tool.extract_pages');
 
+    Route::get('/tool/protect-pdf', function () {
+        return view('tools.protect_pdf');
+    })->name('tool.protect_pdf');
+
     Route::get('/tool/unlock-pdf', function () {
         return view('tools.unlock_pdf');
     })->name('tool.unlock_pdf');
