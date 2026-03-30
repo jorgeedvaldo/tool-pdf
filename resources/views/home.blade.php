@@ -28,17 +28,8 @@
             'name' => __('messages.cat_convert'),
             'icon' => 'bi-arrow-left-right',
             'tools' => [
-                ['id' => 'convert_pdf', 'icon' => 'bi-file-earmark-font', 'color' => 'red'],
                 ['id' => 'images_to_pdf', 'icon' => 'bi-images', 'color' => 'yellow'],
                 ['id' => 'pdf_to_images', 'icon' => 'bi-file-earmark-image', 'color' => 'yellow'],
-                ['id' => 'web_to_pdf', 'icon' => 'bi-globe', 'color' => 'indigo'],
-            ]
-        ],
-        [
-            'name' => __('messages.cat_image'),
-            'icon' => 'bi-image',
-            'tools' => [
-                ['id' => 'extract_images', 'icon' => 'bi-camera', 'color' => 'teal'],
             ]
         ],
         [
@@ -67,22 +58,6 @@
                 ['id' => 'add_watermark', 'icon' => 'bi-droplet', 'color' => 'indigo'],
                 ['id' => 'add_page_numbers', 'icon' => 'bi-123', 'color' => 'gray'],
                 ['id' => 'overlay_pdfs', 'icon' => 'bi-layers', 'color' => 'teal'],
-                ['id' => 'compare_pdfs', 'icon' => 'bi-vr', 'color' => 'blue'],
-            ]
-        ],
-        [
-            'name' => __('messages.cat_optimize'),
-            'icon' => 'bi-speedometer2',
-            'tools' => [
-                ['id' => 'optimize_web', 'icon' => 'bi-cloud-arrow-up', 'color' => 'cyan'],
-                ['id' => 'redact_pdf', 'icon' => 'bi-eraser-fill', 'color' => 'black'],
-            ]
-        ],
-        [
-            'name' => __('messages.cat_create'),
-            'icon' => 'bi-plus-circle',
-            'tools' => [
-                ['id' => 'create_pdf', 'icon' => 'bi-file-earmark-plus-fill', 'color' => 'green'],
             ]
         ]
     ];

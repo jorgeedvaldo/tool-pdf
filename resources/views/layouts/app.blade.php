@@ -157,10 +157,8 @@
                         <li><a class="dropdown-item" href="{{ route('tool.add_page_numbers') }}"><i class="bi bi-123 me-2 text-secondary"></i>{{ __('messages.add_page_numbers') }}</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><h6 class="dropdown-header text-primary fw-bold">{{ __('messages.cat_convert') }}</h6></li>
-                        <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-file-earmark-font me-2 text-danger"></i>{{ __('messages.convert_pdf') }}</a></li>
                         <li><a class="dropdown-item" href="{{ route('tool.images_to_pdf') }}"><i class="bi bi-images me-2 text-warning"></i>{{ __('messages.images_to_pdf') }}</a></li>
                         <li><a class="dropdown-item" href="{{ route('tool.pdf_to_images') }}"><i class="bi bi-file-earmark-image me-2 text-warning"></i>{{ __('messages.pdf_to_images') }}</a></li>
-                        <li><a class="dropdown-item" href="{{ route('home') }}"><i class="bi bi-globe me-2 text-info"></i>{{ __('messages.web_to_pdf') }}</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item fw-bold text-center bg-light py-2" href="{{ route('home') }}#tools-section">{{ __('messages.tools') }}...</a></li>
                     </ul>
