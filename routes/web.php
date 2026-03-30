@@ -105,7 +105,7 @@ Route::group([
 
     Route::get('/tool/pdf-ocr', function () {
         return view('tools.pdf_ocr');
-    })->name('tool.pdf_ocr');
+    })->name('tool.ocr_pdf');
 
     // Info Pages
     Route::get('/about', function () {

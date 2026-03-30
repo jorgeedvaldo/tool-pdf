@@ -151,6 +151,7 @@
                         <li><a class="dropdown-item" href="{{ route('tool.unlock_pdf') }}"><i class="bi bi-unlock me-2 text-success"></i>{{ __('messages.unlock_pdf') }}</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><h6 class="dropdown-header text-primary fw-bold">{{ __('messages.cat_advanced') }}</h6></li>
+                        <li><a class="dropdown-item" href="{{ route('tool.ocr_pdf') }}"><i class="bi bi-search me-2" style="color: #0dcaf0;"></i>{{ __('messages.ocr_pdf') }}</a></li>
                         <li><a class="dropdown-item" href="{{ route('tool.add_watermark') }}"><i class="bi bi-droplet me-2 text-primary"></i>{{ __('messages.add_watermark') }}</a></li>
                         <li><a class="dropdown-item" href="{{ route('tool.add_page_numbers') }}"><i class="bi bi-123 me-2 text-secondary"></i>{{ __('messages.add_page_numbers') }}</a></li>
                         <li><hr class="dropdown-divider"></li>
