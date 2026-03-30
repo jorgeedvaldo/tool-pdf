@@ -186,7 +186,7 @@
                 const lang = ocrLang.value;
 
                 progressText.textContent = "Initializing OCR engine...";
-                const worker = await Tesseract.createWorker(lang, 1, {
+                const worker = await Tesseract.createWorker({
                     logger: m => {
                         if (m.status === 'recognizing text') {
                             const p = Math.round(m.progress * 100);
@@ -194,6 +194,8 @@
                         }
                     }
                 });
+                await worker.loadLanguage(lang);
+                await worker.initialize(lang);
 
                 for (let i = 1; i <= totalPages; i++) {
                     progressText.textContent = `Processing page ${i} of ${totalPages}...`;
@@ -297,7 +299,13 @@
                 
             } catch (err) {
                 console.error(err);
-                showError('Error processing PDF: ' + err.message);
+                if (err && err.message) {
+                    showError('Error processing PDF: ' + err.message);
+                } else if (typeof err === 'string') {
+                    showError('Error processing PDF: ' + err);
+                } else {
+                    showError('Error processing PDF: Unknown error occurred.');
+                }
             } finally {
                 btnAction.disabled = false;
                 btnSpinner.classList.add('d-none');
