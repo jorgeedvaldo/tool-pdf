@@ -19,19 +19,6 @@ Route::get('/', function () {
     return redirect('/' . $locale);
 });
 
-Route::get('/linkstorage', function () {
-    // Cria o link simbólico (storage -> public)
-    Artisan::call('storage:link');
-    Artisan::call('migrate');
-    Artisan::call('cache:clear');
-    Artisan::call('config:clear');
-    Artisan::call('route:clear');
-    Artisan::call('view:clear');
-    Artisan::call('optimize:clear');
-    
-    return 'Symlink criado: <pre>' . Artisan::output() . '</pre>';
-});
-
 // Group all routes under a {locale} prefix
 Route::group([
     'prefix' => '{locale}',
