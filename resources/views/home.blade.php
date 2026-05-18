@@ -59,6 +59,13 @@
                 ['id' => 'add_page_numbers', 'icon' => 'bi-123', 'color' => 'gray'],
                 ['id' => 'overlay_pdfs', 'icon' => 'bi-layers', 'color' => 'teal'],
             ]
+        ],
+        [
+            'name' => __('messages.cat_compare'),
+            'icon' => 'bi-file-diff',
+            'tools' => [
+                ['id' => 'compare_pdf', 'icon' => 'bi-file-diff', 'color' => 'red'],
+            ]
         ]
     ];
     @endphp

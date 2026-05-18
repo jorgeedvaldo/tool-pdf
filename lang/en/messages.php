@@ -17,6 +17,7 @@ return [
     'cat_security' => 'Security',
     'cat_manage' => 'Manage Pages',
     'cat_advanced' => 'Advanced Tools',
+    'cat_compare' => 'Compare',
     'cat_optimize' => 'Optimization & Protection',
     'cat_create' => 'Creation',
 
@@ -83,6 +84,9 @@ return [
     
     'compare_pdfs' => 'Compare PDFs',
     'compare_pdfs_desc' => 'Check differences between documents.',
+
+    'compare_pdf' => 'Compare PDF',
+    'compare_pdf_desc' => 'Find visual and text differences between two PDF documents.',
     
     'optimize_web' => 'Optimize for Web',
     'optimize_web_desc' => 'Improve online loading of your PDF.',

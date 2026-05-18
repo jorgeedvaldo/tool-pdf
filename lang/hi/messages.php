@@ -17,6 +17,7 @@ return [
     'cat_security' => 'सुरक्षा',
     'cat_manage' => 'पृष्ठ प्रबंधित करें',
     'cat_advanced' => 'उन्नत उपकरण',
+    'cat_compare' => 'तुलना',
     'cat_optimize' => 'अनुकूलन और सुरक्षा',
     'cat_create' => 'सृजन',
 
@@ -83,6 +84,9 @@ return [
     
     'compare_pdfs' => 'PDF की तुलना करें',
     'compare_pdfs_desc' => 'दस्तावेज़ों के बीच अंतर जांचें।',
+
+    'compare_pdf' => 'PDF तुलना करें',
+    'compare_pdf_desc' => 'दो PDF दस्तावेज़ों के बीच दृश्य और पाठ अंतर खोजें।',
     
     'optimize_web' => 'वेब के लिए अनुकूलित करें',
     'optimize_web_desc' => 'ऑनलाइन लोडिंग में सुधार करें।',
