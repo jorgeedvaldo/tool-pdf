@@ -115,6 +115,10 @@ Route::group([
         return view('tools.pdf_ocr');
     })->name('tool.ocr_pdf');
 
+    Route::get('/tool/compare-pdf', function () {
+        return view('tools.compare_pdf');
+    })->name('tool.compare_pdf');
+
     // Info Pages
     Route::get('/about', function () {
         return view('pages.about');

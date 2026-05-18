@@ -156,6 +156,9 @@
                         <li><a class="dropdown-item" href="{{ route('tool.add_watermark') }}"><i class="bi bi-droplet me-2 text-primary"></i>{{ __('messages.add_watermark') }}</a></li>
                         <li><a class="dropdown-item" href="{{ route('tool.add_page_numbers') }}"><i class="bi bi-123 me-2 text-secondary"></i>{{ __('messages.add_page_numbers') }}</a></li>
                         <li><hr class="dropdown-divider"></li>
+                        <li><h6 class="dropdown-header text-primary fw-bold">{{ __('messages.cat_compare') ?? 'Compare' }}</h6></li>
+                        <li><a class="dropdown-item" href="{{ route('tool.compare_pdf') }}"><i class="bi bi-file-diff me-2 text-danger"></i>Compare PDF</a></li>
+                        <li><hr class="dropdown-divider"></li>
                         <li><h6 class="dropdown-header text-primary fw-bold">{{ __('messages.cat_convert') }}</h6></li>
                         <li><a class="dropdown-item" href="{{ route('tool.images_to_pdf') }}"><i class="bi bi-images me-2 text-warning"></i>{{ __('messages.images_to_pdf') }}</a></li>
                         <li><a class="dropdown-item" href="{{ route('tool.pdf_to_images') }}"><i class="bi bi-file-earmark-image me-2 text-warning"></i>{{ __('messages.pdf_to_images') }}</a></li>
