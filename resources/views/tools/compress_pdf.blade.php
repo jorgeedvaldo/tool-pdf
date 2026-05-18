@@ -193,34 +193,42 @@
                 const totalPages = pdfDoc.numPages;
                 
                 const { jsPDF } = window.jspdf;
-                const outDoc = new jsPDF({ orientation: 'portrait', unit: 'px', format: 'a4' });
-                
+
+                // Get first page dimensions to initialise jsPDF with the correct page size
+                const firstPage = await pdfDoc.getPage(1);
+                const firstViewport = firstPage.getViewport({ scale: 1.0 });
+                const outDoc = new jsPDF({
+                    orientation: firstViewport.width > firstViewport.height ? 'landscape' : 'portrait',
+                    unit: 'px',
+                    format: [firstViewport.width, firstViewport.height]
+                });
+
                 for (let i = 1; i <= totalPages; i++) {
                     progressBar.style.width = `${((i-1)/totalPages)*100}%`;
                     progressText.textContent = `Compressing...`;
                     progressDetail.textContent = `Processing page ${i} of ${totalPages}`;
-                    
+
                     const page = await pdfDoc.getPage(i);
                     const defaultViewport = page.getViewport({ scale: 1.0 });
-                    const viewport = page.getViewport({ scale: scale }); // rendering scale
-                    
+                    const viewport = page.getViewport({ scale: scale });
+
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
                     canvas.width = viewport.width;
                     canvas.height = viewport.height;
-                    
+
                     await page.render({ canvasContext: context, viewport: viewport }).promise;
-                    
-                    // Compress to JPG
+
                     const imgData = canvas.toDataURL('image/jpeg', jpgQuality);
-                    
-                    // Add to jsPDF using original unmodified dimensions
+
+                    // Add new page for every page after the first, using the actual page dimensions
                     if (i > 1) {
-                        outDoc.addPage([defaultViewport.width, defaultViewport.height], defaultViewport.width > defaultViewport.height ? 'landscape' : 'portrait');
-                        outDoc.setPage(i);
-                    } else {
-                        // Optional: first page sizing hack not needed for jsPDF but good to align
+                        outDoc.addPage(
+                            [defaultViewport.width, defaultViewport.height],
+                            defaultViewport.width > defaultViewport.height ? 'landscape' : 'portrait'
+                        );
                     }
+                    // Place the image to exactly fill the page
                     outDoc.addImage(imgData, 'JPEG', 0, 0, defaultViewport.width, defaultViewport.height, '', 'FAST');
                 }
 
