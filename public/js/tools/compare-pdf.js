@@ -6,16 +6,10 @@ const pendingDiffs = new Map();
 let diffIdCounter = 0;
 
 diffWorker.onmessage = ({ data }) => {
-    const resolve = pendingDiffs.get(data.id);
-    if (!resolve) return;
+    const cb = pendingDiffs.get(data.id);
+    if (!cb) return;
     pendingDiffs.delete(data.id);
-    if (data.type === 'error') {
-        // Graceful fallback: treat page as having 0 diff
-        console.warn('pixelmatch error (page skipped):', data.message);
-        resolve({ diffOut: new Uint8ClampedArray(0).buffer, ratio: 0 });
-        return;
-    }
-    resolve(data);
+    cb(data);
 };
 diffWorker.onerror = e => console.error('Diff worker error:', e);
 
@@ -44,11 +38,18 @@ function runVisualDiff(imgA, imgB, threshold) {
         const bufB = exactCopy(normalise(imgB.imageData, imgB.width, imgB.height));
         const id = diffIdCounter++;
 
-        pendingDiffs.set(id, ({ diffOut, ratio }) => {
+        pendingDiffs.set(id, (data) => {
+            if (data.type === 'error') {
+                console.warn('pixelmatch skipped (page diff=0):', data.message);
+                resolve({ ratio: 0, diffCanvas: null });
+                return;
+            }
             const diffCanvas = document.createElement('canvas');
             diffCanvas.width = w; diffCanvas.height = h;
-            diffCanvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(diffOut), w, h), 0, 0);
-            resolve({ ratio, diffCanvas });
+            diffCanvas.getContext('2d').putImageData(
+                new ImageData(new Uint8ClampedArray(data.diffOut), w, h), 0, 0
+            );
+            resolve({ ratio: data.ratio, diffCanvas });
         });
 
         diffWorker.postMessage(
