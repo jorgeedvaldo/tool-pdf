@@ -240,12 +240,14 @@ $('cmp-cancel-btn').addEventListener('click', () => { S.cancelled = true; });
 $('cmp-new-comparison').addEventListener('click', () => {
     $('cmp-results-area').classList.add('d-none');
     $('cmp-upload-section').classList.remove('d-none');
+    $('cmp-hero').classList.remove('d-none');
 });
 
 async function runComparison() {
     S.cancelled = false; S.results = [];
     $('cmp-upload-section').classList.add('d-none');
     $('cmp-results-area').classList.add('d-none');
+    $('cmp-hero').classList.add('d-none');
     $('cmp-progress-area').classList.remove('d-none');
     $('cmp-compare-btn').disabled = true;
     setProgress(0, 'Loading PDFs…');
@@ -367,10 +369,10 @@ function renderContinuousViewer() {
         const bL = makePageBlock(r.i), bR = makePageBlock(r.i);
         left.appendChild(bL); right.appendChild(bR);
 
-        if (r.imgA) drawPageBlock(bL, r.imgA, r.diffCanvas, r.hlA, 'rgba(239,68,68,0.50)');
+        if (r.imgA) drawPageBlock(bL, r.imgA, r.diffCanvas, r.hlA, 'rgba(239,68,68,0.25)');
         else bL.appendChild(makePlaceholder('No page'));
 
-        if (r.imgB) drawPageBlock(bR, r.imgB, null, r.hlB, 'rgba(34,197,94,0.50)');
+        if (r.imgB) drawPageBlock(bR, r.imgB, null, r.hlB, 'rgba(34,197,94,0.25)');
         else bR.appendChild(makePlaceholder('No page'));
     });
 
