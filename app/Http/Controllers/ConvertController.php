@@ -95,8 +95,10 @@ class ConvertController extends Controller
     {
         // Use an isolated LibreOffice profile per request to avoid lock conflicts
         // when multiple conversions run concurrently.
+        $binary = $this->findLibreOffice();
+
         $cmd = array_merge(
-            ['libreoffice', '--headless', '--norestore', '--nofirststartwizard'],
+            [$binary, '--headless', '--norestore', '--nofirststartwizard'],
             $args
         );
 
@@ -114,6 +116,25 @@ class ConvertController extends Controller
                 'LibreOffice error: ' . trim($process->getErrorOutput() ?: $process->getOutput())
             );
         }
+    }
+
+    private function findLibreOffice(): string
+    {
+        $candidates = [
+            '/usr/bin/libreoffice',
+            '/usr/bin/soffice',
+            '/usr/local/bin/libreoffice',
+            '/usr/local/bin/soffice',
+            '/opt/libreoffice/program/soffice',
+        ];
+
+        foreach ($candidates as $path) {
+            if (is_executable($path)) {
+                return $path;
+            }
+        }
+
+        throw new \RuntimeException('LibreOffice não encontrado no servidor.');
     }
 
     private function makeTmpDir(): string
