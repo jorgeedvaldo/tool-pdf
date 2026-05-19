@@ -52,6 +52,21 @@ return [
     'word_to_pdf' => 'Word в PDF',
     'word_to_pdf_desc' => 'Конвертируйте документы Word в формат PDF.',
 
+    'pdf_to_excel' => 'PDF в Excel',
+    'pdf_to_excel_desc' => 'Извлекайте данные из PDF в редактируемую таблицу.',
+    'excel_to_pdf' => 'Excel в PDF',
+    'excel_to_pdf_desc' => 'Конвертируйте таблицы Excel в формат PDF.',
+    'pdf_to_ppt' => 'PDF в PowerPoint',
+    'pdf_to_ppt_desc' => 'Конвертируйте PDF-файлы в редактируемые презентации PowerPoint.',
+    'ppt_to_pdf' => 'PowerPoint в PDF',
+    'ppt_to_pdf_desc' => 'Конвертируйте презентации PowerPoint в формат PDF.',
+    'html_to_pdf' => 'HTML в PDF',
+    'html_to_pdf_desc' => 'Конвертируйте любой URL веб-страницы в файл PDF.',
+    'flatten_pdf' => 'Сгладить PDF',
+    'flatten_pdf_desc' => 'Делает поля форм и аннотации постоянными.',
+    'repair_pdf' => 'Восстановить PDF',
+    'repair_pdf_desc' => 'Исправляет повреждённые или испорченные PDF-файлы.',
+
     'web_to_pdf' => 'Веб-страница в PDF',
     'web_to_pdf_desc' => 'Сохраните веб-сайт как PDF.',
     

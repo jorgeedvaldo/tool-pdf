@@ -52,6 +52,21 @@ return [
     'word_to_pdf' => 'Word转PDF',
     'word_to_pdf_desc' => '将Word文档转换为PDF格式。',
 
+    'pdf_to_excel' => 'PDF转Excel',
+    'pdf_to_excel_desc' => '将PDF中的数据提取到可编辑的电子表格中。',
+    'excel_to_pdf' => 'Excel转PDF',
+    'excel_to_pdf_desc' => '将Excel电子表格转换为PDF格式。',
+    'pdf_to_ppt' => 'PDF转PowerPoint',
+    'pdf_to_ppt_desc' => '将PDF文件转换为可编辑的PowerPoint演示文稿。',
+    'ppt_to_pdf' => 'PowerPoint转PDF',
+    'ppt_to_pdf_desc' => '将PowerPoint演示文稿转换为PDF格式。',
+    'html_to_pdf' => 'HTML转PDF',
+    'html_to_pdf_desc' => '将任意网页URL转换为PDF文件。',
+    'flatten_pdf' => '展平PDF',
+    'flatten_pdf_desc' => '将表单字段和注释永久化。',
+    'repair_pdf' => '修复PDF',
+    'repair_pdf_desc' => '修复损坏或受损的PDF文件。',
+
     'web_to_pdf' => '网页转PDF',
     'web_to_pdf_desc' => '将网站保存为PDF。',
     

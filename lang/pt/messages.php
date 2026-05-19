@@ -52,6 +52,21 @@ return [
     'word_to_pdf' => 'Word para PDF',
     'word_to_pdf_desc' => 'Converta documentos Word para formato PDF.',
 
+    'pdf_to_excel' => 'PDF para Excel',
+    'pdf_to_excel_desc' => 'Extraia dados de PDF para planilha editável.',
+    'excel_to_pdf' => 'Excel para PDF',
+    'excel_to_pdf_desc' => 'Converta planilhas Excel para o formato PDF.',
+    'pdf_to_ppt' => 'PDF para PowerPoint',
+    'pdf_to_ppt_desc' => 'Converta arquivos PDF em apresentações editáveis do PowerPoint.',
+    'ppt_to_pdf' => 'PowerPoint para PDF',
+    'ppt_to_pdf_desc' => 'Converta apresentações do PowerPoint para o formato PDF.',
+    'html_to_pdf' => 'HTML para PDF',
+    'html_to_pdf_desc' => 'Converta qualquer URL de página web em um arquivo PDF.',
+    'flatten_pdf' => 'Achatar PDF',
+    'flatten_pdf_desc' => 'Torna campos de formulário e anotações permanentes.',
+    'repair_pdf' => 'Reparar PDF',
+    'repair_pdf_desc' => 'Corrija arquivos PDF corrompidos ou danificados.',
+
     'web_to_pdf' => 'Página Web para PDF',
     'web_to_pdf_desc' => 'Salvar um site como PDF.',
     

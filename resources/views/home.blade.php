@@ -28,38 +28,45 @@
             'name' => __('messages.cat_convert'),
             'icon' => 'bi-arrow-left-right',
             'tools' => [
-                ['id' => 'images_to_pdf', 'icon' => 'bi-images', 'color' => 'yellow'],
-                ['id' => 'pdf_to_images', 'icon' => 'bi-file-earmark-image', 'color' => 'yellow'],
-                ['id' => 'pdf_to_word', 'icon' => 'bi-file-earmark-word', 'color' => 'blue'],
-                ['id' => 'word_to_pdf', 'icon' => 'bi-file-earmark-pdf', 'color' => 'red'],
+                ['id' => 'images_to_pdf',  'icon' => 'bi-images',                  'color' => 'yellow'],
+                ['id' => 'pdf_to_images',  'icon' => 'bi-file-earmark-image',       'color' => 'yellow'],
+                ['id' => 'pdf_to_word',    'icon' => 'bi-file-earmark-word',        'color' => 'blue'],
+                ['id' => 'word_to_pdf',    'icon' => 'bi-file-earmark-pdf',         'color' => 'red'],
+                ['id' => 'pdf_to_excel',   'icon' => 'bi-file-earmark-spreadsheet', 'color' => 'green'],
+                ['id' => 'excel_to_pdf',   'icon' => 'bi-file-earmark-spreadsheet', 'color' => 'green'],
+                ['id' => 'pdf_to_ppt',     'icon' => 'bi-file-earmark-slides',      'color' => 'orange'],
+                ['id' => 'ppt_to_pdf',     'icon' => 'bi-file-earmark-slides',      'color' => 'orange'],
+                ['id' => 'html_to_pdf',    'icon' => 'bi-globe',                    'color' => 'blue'],
             ]
         ],
         [
             'name' => __('messages.cat_security'),
             'icon' => 'bi-shield-lock',
             'tools' => [
-                ['id' => 'protect_pdf', 'icon' => 'bi-lock', 'color' => 'gray'],
-                ['id' => 'unlock_pdf', 'icon' => 'bi-unlock', 'color' => 'green'],
+                ['id' => 'protect_pdf', 'icon' => 'bi-lock',   'color' => 'gray'],
+                ['id' => 'unlock_pdf',  'icon' => 'bi-unlock', 'color' => 'green'],
             ]
         ],
         [
             'name' => __('messages.cat_manage'),
             'icon' => 'bi-files',
             'tools' => [
-                ['id' => 'rotate_pages', 'icon' => 'bi-arrow-clockwise', 'color' => 'orange'],
-                ['id' => 'remove_pages', 'icon' => 'bi-file-earmark-minus', 'color' => 'red'],
-                ['id' => 'extract_pages', 'icon' => 'bi-file-earmark-break', 'color' => 'blue'],
-                ['id' => 'reorganize_pages', 'icon' => 'bi-shuffle', 'color' => 'purple'],
+                ['id' => 'rotate_pages',     'icon' => 'bi-arrow-clockwise',    'color' => 'orange'],
+                ['id' => 'remove_pages',     'icon' => 'bi-file-earmark-minus', 'color' => 'red'],
+                ['id' => 'extract_pages',    'icon' => 'bi-file-earmark-break', 'color' => 'blue'],
+                ['id' => 'reorganize_pages', 'icon' => 'bi-shuffle',            'color' => 'purple'],
+                ['id' => 'flatten_pdf',      'icon' => 'bi-layers',             'color' => 'orange'],
+                ['id' => 'repair_pdf',       'icon' => 'bi-wrench',             'color' => 'teal'],
             ]
         ],
         [
             'name' => __('messages.cat_advanced'),
             'icon' => 'bi-gear',
             'tools' => [
-                ['id' => 'ocr_pdf', 'icon' => 'bi-search', 'color' => 'cyan'],
-                ['id' => 'add_watermark', 'icon' => 'bi-droplet', 'color' => 'indigo'],
-                ['id' => 'add_page_numbers', 'icon' => 'bi-123', 'color' => 'gray'],
-                ['id' => 'overlay_pdfs', 'icon' => 'bi-layers', 'color' => 'teal'],
+                ['id' => 'ocr_pdf',          'icon' => 'bi-search',   'color' => 'cyan'],
+                ['id' => 'add_watermark',    'icon' => 'bi-droplet',  'color' => 'indigo'],
+                ['id' => 'add_page_numbers', 'icon' => 'bi-123',      'color' => 'gray'],
+                ['id' => 'overlay_pdfs',     'icon' => 'bi-layers',   'color' => 'teal'],
             ]
         ],
         [

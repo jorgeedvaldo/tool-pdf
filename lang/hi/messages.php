@@ -52,6 +52,21 @@ return [
     'word_to_pdf' => 'Word को PDF में बदलें',
     'word_to_pdf_desc' => 'Word दस्तावेज़ों को PDF प्रारूप में बदलें।',
 
+    'pdf_to_excel' => 'PDF से Excel',
+    'pdf_to_excel_desc' => 'PDF से डेटा को संपादन योग्य स्प्रेडशीट में निकालें।',
+    'excel_to_pdf' => 'Excel से PDF',
+    'excel_to_pdf_desc' => 'Excel स्प्रेडशीट को PDF प्रारूप में बदलें।',
+    'pdf_to_ppt' => 'PDF से PowerPoint',
+    'pdf_to_ppt_desc' => 'PDF फ़ाइलों को संपादन योग्य PowerPoint प्रस्तुतियों में बदलें।',
+    'ppt_to_pdf' => 'PowerPoint से PDF',
+    'ppt_to_pdf_desc' => 'PowerPoint प्रस्तुतियों को PDF प्रारूप में बदलें।',
+    'html_to_pdf' => 'HTML से PDF',
+    'html_to_pdf_desc' => 'किसी भी वेबपेज URL को PDF फ़ाइल में बदलें।',
+    'flatten_pdf' => 'PDF को समतल करें',
+    'flatten_pdf_desc' => 'फ़ॉर्म फ़ील्ड और एनोटेशन को स्थायी बनाएं।',
+    'repair_pdf' => 'PDF की मरम्मत करें',
+    'repair_pdf_desc' => 'दूषित या क्षतिग्रस्त PDF फ़ाइलों को ठीक करें।',
+
     'web_to_pdf' => 'वेबपेज को PDF में बदलें',
     'web_to_pdf_desc' => 'किसी वेबसाइट को PDF के रूप में सहेजें।',
     

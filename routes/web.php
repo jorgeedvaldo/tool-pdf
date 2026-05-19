@@ -127,6 +127,74 @@ Route::group([
         return view('tools.convert_pdf_word', ['mode' => 'word-to-pdf']);
     })->name('tool.word_to_pdf');
 
+    Route::get('/tool/pdf-to-excel', function () {
+        return view('tools.convert_generic', ['config' => [
+            'title'       => 'PDF to Excel',
+            'title_desc'  => 'Extract data from PDF into an editable spreadsheet.',
+            'accept'      => '.pdf,application/pdf',
+            'accept_label'=> 'PDF file',
+            'route'       => 'convert.pdf_to_excel',
+            'output_ext'  => '.xlsx',
+            'icon_color'  => 'success',
+            'icon_class'  => 'bi-file-earmark-spreadsheet',
+            'badges'      => ['⚡ Server-side', '🗑️ Auto-deleted'],
+        ]]);
+    })->name('tool.pdf_to_excel');
+
+    Route::get('/tool/excel-to-pdf', function () {
+        return view('tools.convert_generic', ['config' => [
+            'title'       => 'Excel to PDF',
+            'title_desc'  => 'Convert Excel spreadsheets to PDF. Supports .xlsx, .xls, .ods and .csv.',
+            'accept'      => '.xlsx,.xls,.ods,.csv',
+            'accept_label'=> 'Excel or spreadsheet file (.xlsx, .xls, .ods, .csv)',
+            'route'       => 'convert.excel_to_pdf',
+            'output_ext'  => '.pdf',
+            'icon_color'  => 'success',
+            'icon_class'  => 'bi-file-earmark-spreadsheet',
+            'badges'      => ['⚡ Server-side', '🗑️ Auto-deleted'],
+        ]]);
+    })->name('tool.excel_to_pdf');
+
+    Route::get('/tool/pdf-to-ppt', function () {
+        return view('tools.convert_generic', ['config' => [
+            'title'       => 'PDF to PowerPoint',
+            'title_desc'  => 'Convert PDF pages to editable PowerPoint slides.',
+            'accept'      => '.pdf,application/pdf',
+            'accept_label'=> 'PDF file',
+            'route'       => 'convert.pdf_to_ppt',
+            'output_ext'  => '.pptx',
+            'icon_color'  => 'warning',
+            'icon_class'  => 'bi-file-earmark-slides',
+            'badges'      => ['⚡ Server-side', '🗑️ Auto-deleted'],
+        ]]);
+    })->name('tool.pdf_to_ppt');
+
+    Route::get('/tool/ppt-to-pdf', function () {
+        return view('tools.convert_generic', ['config' => [
+            'title'       => 'PowerPoint to PDF',
+            'title_desc'  => 'Convert PowerPoint presentations to PDF. Supports .pptx and .odp.',
+            'accept'      => '.pptx,.ppt,.odp',
+            'accept_label'=> 'PowerPoint file (.pptx, .odp)',
+            'route'       => 'convert.ppt_to_pdf',
+            'output_ext'  => '.pdf',
+            'icon_color'  => 'warning',
+            'icon_class'  => 'bi-file-earmark-slides',
+            'badges'      => ['⚡ Server-side', '🗑️ Auto-deleted'],
+        ]]);
+    })->name('tool.ppt_to_pdf');
+
+    Route::get('/tool/html-to-pdf', function () {
+        return view('tools.html_to_pdf');
+    })->name('tool.html_to_pdf');
+
+    Route::get('/tool/flatten-pdf', function () {
+        return view('tools.flatten_pdf');
+    })->name('tool.flatten_pdf');
+
+    Route::get('/tool/repair-pdf', function () {
+        return view('tools.repair_pdf');
+    })->name('tool.repair_pdf');
+
     // Info Pages
     Route::get('/about', function () {
         return view('pages.about');
@@ -157,6 +225,11 @@ Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'ind
 Route::get('/sitemap/{lang}.xml', [\App\Http\Controllers\SitemapController::class, 'show'])->where('lang', '[a-zA-Z]{2}');
 Route::get('/feed', [\App\Http\Controllers\FeedController::class, 'index']);
 
-// Server-side conversion endpoints (LibreOffice)
-Route::post('/convert/pdf-to-word', [\App\Http\Controllers\ConvertController::class, 'pdfToWord'])->name('convert.pdf_to_word');
-Route::post('/convert/word-to-pdf', [\App\Http\Controllers\ConvertController::class, 'wordToPdf'])->name('convert.word_to_pdf');
+// Server-side conversion endpoints (pure PHP — no system binaries required)
+Route::post('/convert/pdf-to-word',  [\App\Http\Controllers\ConvertController::class, 'pdfToWord'])->name('convert.pdf_to_word');
+Route::post('/convert/word-to-pdf',  [\App\Http\Controllers\ConvertController::class, 'wordToPdf'])->name('convert.word_to_pdf');
+Route::post('/convert/pdf-to-excel', [\App\Http\Controllers\ConvertController::class, 'pdfToExcel'])->name('convert.pdf_to_excel');
+Route::post('/convert/excel-to-pdf', [\App\Http\Controllers\ConvertController::class, 'excelToPdf'])->name('convert.excel_to_pdf');
+Route::post('/convert/pdf-to-ppt',   [\App\Http\Controllers\ConvertController::class, 'pdfToPpt'])->name('convert.pdf_to_ppt');
+Route::post('/convert/ppt-to-pdf',   [\App\Http\Controllers\ConvertController::class, 'pptToPdf'])->name('convert.ppt_to_pdf');
+Route::post('/convert/html-to-pdf',  [\App\Http\Controllers\ConvertController::class, 'htmlToPdf'])->name('convert.html_to_pdf');
