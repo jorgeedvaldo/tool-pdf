@@ -117,6 +117,9 @@ async function convertPdfToWord(file) {
     const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(ab) }).promise;
     const includeImages = $('cw-include-images')?.checked;
 
+    if (!window.docx) {
+        throw new Error('Biblioteca docx não carregou. Verifique sua conexão e recarregue a página.');
+    }
     const { Document, Packer, Paragraph, TextRun, AlignmentType, PageBreak, ImageRun } = window.docx;
 
     const sections = [];
@@ -243,17 +246,23 @@ async function convertWordToPdf(file) {
             ],
         }
     );
-    const html = result.value;
+    const html = (result.value || '').trim();
+    if (!html) {
+        throw new Error('O documento Word parece estar vazio ou sem conteúdo textual extraível.');
+    }
 
     setProgress(45, 'A montar página…');
 
-    // Build a printable container styled like an A4 document
+    // Build a printable container styled like an A4 document.
+    // Position off-screen to the right (NOT with opacity:0 — that would make
+    // html2canvas capture transparent pixels and produce a blank PDF).
     const container = document.createElement('div');
     container.id = 'cw-render-target';
     container.style.cssText = `
         width: 794px; padding: 48px 56px; background: #ffffff; color: #111;
         font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5;
-        box-sizing: border-box; position: absolute; left: -10000px; top: 0;
+        box-sizing: border-box; position: fixed; top: 0; left: 100vw;
+        pointer-events: none; z-index: -1;
     `;
     container.innerHTML = `
         <style>
@@ -287,7 +296,10 @@ async function convertWordToPdf(file) {
         margin: 0,
         filename: file.name.replace(/\.docx$/i, '') + '.pdf',
         image:    { type: 'jpeg', quality: 0.96 },
-        html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' },
+        html2canvas: {
+            scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff',
+            width: 794, windowWidth: 794,
+        },
         jsPDF:    { unit: 'pt', format: 'a4', orientation: 'portrait', compress: true },
         pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
     };
