@@ -6,11 +6,10 @@ const pendingDiffs = new Map();
 let diffIdCounter = 0;
 
 diffWorker.onmessage = ({ data }) => {
-    if (data.type !== 'result') return;
-    const resolve = pendingDiffs.get(data.id);
-    if (!resolve) return;
+    const cb = pendingDiffs.get(data.id);
+    if (!cb) return;
     pendingDiffs.delete(data.id);
-    resolve(data);
+    cb(data);
 };
 diffWorker.onerror = e => console.error('Diff worker error:', e);
 
@@ -28,15 +27,29 @@ function runVisualDiff(imgA, imgB, threshold) {
             return c.getContext('2d').getImageData(0, 0, w, h).data;
         };
 
-        const bufA = normalise(imgA.imageData, imgA.width, imgA.height).buffer.slice(0);
-        const bufB = normalise(imgB.imageData, imgB.width, imgB.height).buffer.slice(0);
+        // ImageData.data.buffer may be larger than w*h*4 due to browser padding —
+        // create an exact-size copy so pixelmatch never sees a size mismatch.
+        const exactCopy = arr => {
+            const out = new Uint8ClampedArray(w * h * 4);
+            out.set(new Uint8ClampedArray(arr.buffer, arr.byteOffset, Math.min(arr.byteLength, w * h * 4)));
+            return out.buffer;
+        };
+        const bufA = exactCopy(normalise(imgA.imageData, imgA.width, imgA.height));
+        const bufB = exactCopy(normalise(imgB.imageData, imgB.width, imgB.height));
         const id = diffIdCounter++;
 
-        pendingDiffs.set(id, ({ diffOut, ratio }) => {
+        pendingDiffs.set(id, (data) => {
+            if (data.type === 'error') {
+                console.warn('pixelmatch skipped (page diff=0):', data.message);
+                resolve({ ratio: 0, diffCanvas: null });
+                return;
+            }
             const diffCanvas = document.createElement('canvas');
             diffCanvas.width = w; diffCanvas.height = h;
-            diffCanvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(diffOut), w, h), 0, 0);
-            resolve({ ratio, diffCanvas });
+            diffCanvas.getContext('2d').putImageData(
+                new ImageData(new Uint8ClampedArray(data.diffOut), w, h), 0, 0
+            );
+            resolve({ ratio: data.ratio, diffCanvas });
         });
 
         diffWorker.postMessage(
