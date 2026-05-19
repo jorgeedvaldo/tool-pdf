@@ -27,20 +27,20 @@ function runVisualDiff(imgA, imgB, threshold) {
             return c.getContext('2d').getImageData(0, 0, w, h).data;
         };
 
-        // ImageData.data.buffer may be larger than w*h*4 due to browser padding —
-        // create an exact-size copy so pixelmatch never sees a size mismatch.
+        // Exact-size copy to avoid browser ImageData buffer padding mismatch
         const exactCopy = arr => {
             const out = new Uint8ClampedArray(w * h * 4);
             out.set(new Uint8ClampedArray(arr.buffer, arr.byteOffset, Math.min(arr.byteLength, w * h * 4)));
             return out.buffer;
         };
+
         const bufA = exactCopy(normalise(imgA.imageData, imgA.width, imgA.height));
         const bufB = exactCopy(normalise(imgB.imageData, imgB.width, imgB.height));
         const id = diffIdCounter++;
 
         pendingDiffs.set(id, (data) => {
             if (data.type === 'error') {
-                console.warn('pixelmatch skipped (page diff=0):', data.message);
+                console.warn('pixelmatch skipped:', data.message);
                 resolve({ ratio: 0, diffCanvas: null });
                 return;
             }
@@ -62,7 +62,9 @@ function runVisualDiff(imgA, imgB, threshold) {
 // ── State ─────────────────────────────────────────────────────────────────────
 const S = {
     pdfA: null, pdfB: null, fileA: null, fileB: null,
-    results: [], zoom: 1.0, syncScroll: true, showDiffOverlay: true,
+    results: [], zoom: 1.0, syncScroll: true,
+    showDiffOverlay: true,   // pixelmatch overlay
+    showTextHighlights: true, // text highlights
     changedOnly: false, currentPage: 1, totalPages: 0,
     cancelled: false, ocrEnabled: false, TesseractLib: null,
     textPage: 1, overlayPage: 1, threshold: 0.1,
@@ -108,7 +110,6 @@ function setupUpload(dropZoneId, inputId, cardId, nameId, sizeId, removeId, erro
 
 setupUpload('original-drop-zone','original-file-input','original-file-card','original-file-name','original-file-size','original-remove-btn','original-file-error','A');
 setupUpload('modified-drop-zone','modified-file-input','modified-file-card','modified-file-name','modified-file-size','modified-remove-btn','modified-file-error','B');
-
 function updateCompareBtn() { $('cmp-compare-btn').disabled = !(S.fileA && S.fileB); }
 
 // ── Options ───────────────────────────────────────────────────────────────────
@@ -139,6 +140,7 @@ async function loadPdf(file) {
     return pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
 }
 
+// Render page to ImageData (clean, no highlights)
 async function renderPageToData(pdfDoc, pageNum) {
     const page = await pdfDoc.getPage(pageNum);
     const vp = page.getViewport({ scale: RENDER_SCALE });
@@ -149,14 +151,50 @@ async function renderPageToData(pdfDoc, pageNum) {
     return { imageData: ctx.getImageData(0, 0, vp.width, vp.height), canvas, width: vp.width, height: vp.height };
 }
 
-async function extractText(pdfDoc, pageNum) {
-    if (S.ocrEnabled && S.TesseractLib) {
-        const { canvas } = await renderPageToData(pdfDoc, pageNum);
-        const { data: { text } } = await S.TesseractLib.recognize(canvas, 'eng');
-        return text;
-    }
+// ── Text extraction with positions ────────────────────────────────────────────
+async function extractTextItems(pdfDoc, pageNum) {
     const page = await pdfDoc.getPage(pageNum);
-    return (await page.getTextContent()).items.map(i => i.str).join(' ');
+    const vp   = page.getViewport({ scale: RENDER_SCALE });
+    const tc   = await page.getTextContent();
+
+    const items = [];
+    let fullText = '';
+
+    for (const item of tc.items) {
+        if (!item.str) continue;
+
+        // Convert PDF user-space origin (bottom-left of text) → canvas coords
+        const [cx, cy] = pdfjsLib.Util.applyTransform(
+            [item.transform[4], item.transform[5]], vp.transform
+        );
+
+        // Font size in canvas units (approximate from transform matrix)
+        const fontSize = Math.hypot(item.transform[0], item.transform[1]) * RENDER_SCALE;
+        // Text width in canvas units
+        const itemW = Math.abs(item.width || 0) * RENDER_SCALE;
+
+        if (item.str.trim()) {
+            items.push({
+                str: item.str,
+                startChar: fullText.length,
+                endChar:   fullText.length + item.str.length,
+                x: cx,
+                y: cy - fontSize,        // baseline → top of glyph
+                w: Math.max(itemW, 2),
+                h: fontSize * 1.25,
+            });
+        }
+        fullText += item.str;
+    }
+
+    return { items, fullText };
+}
+
+// OCR fallback (no positional data)
+async function extractTextOCR(pdfDoc, pageNum) {
+    const { canvas } = await renderPageToData(pdfDoc, pageNum);
+    const { data: { text } } = await S.TesseractLib.recognize(canvas, 'eng');
+    return { items: [], fullText: text };
 }
 
 // ── Text diff ─────────────────────────────────────────────────────────────────
@@ -169,6 +207,31 @@ function buildTextDiff(textA, textB) {
         else                { html += `<span class="pdf-diff-unchanged">${esc}</span>`; }
     }
     return { html, added, removed };
+}
+
+// Map diff words → text item positions for green/red highlights
+function computeTextHighlights(textA, itemsA, textB, itemsB) {
+    const parts = diffWords(textA, textB);
+    const hlA = [], hlB = [];
+    let posA = 0, posB = 0;
+
+    for (const part of parts) {
+        const len = part.value.length;
+        if (part.removed) {
+            itemsA.forEach(it => {
+                if (it.endChar > posA && it.startChar < posA + len) hlA.push(it);
+            });
+            posA += len;
+        } else if (part.added) {
+            itemsB.forEach(it => {
+                if (it.endChar > posB && it.startChar < posB + len) hlB.push(it);
+            });
+            posB += len;
+        } else {
+            posA += len; posB += len;
+        }
+    }
+    return { hlA, hlB };
 }
 
 // ── Run comparison ────────────────────────────────────────────────────────────
@@ -194,23 +257,38 @@ async function runComparison() {
         S.totalPages = Math.max(nA, nB); S.currentPage = 1;
 
         $('cmp-orig-pages-lbl').textContent = nA + ' pg';
-        $('cmp-mod-pages-lbl').textContent = nB + ' pg';
-        $('cmp-orig-file-lbl').textContent = S.fileA.name;
-        $('cmp-mod-file-lbl').textContent = S.fileB.name;
-        $('cmp-page-total').textContent = S.totalPages;
-        $('cmp-text-page-tot').textContent = S.totalPages;
+        $('cmp-mod-pages-lbl').textContent  = nB + ' pg';
+        $('cmp-orig-file-lbl').textContent  = S.fileA.name;
+        $('cmp-mod-file-lbl').textContent   = S.fileB.name;
+        $('cmp-page-total').textContent     = S.totalPages;
+        $('cmp-text-page-tot').textContent  = S.totalPages;
         $('cmp-overlay-page-tot').textContent = S.totalPages;
 
         for (let i = 1; i <= S.totalPages; i++) {
             if (S.cancelled) break;
             setProgress(Math.round(i / S.totalPages * 90), `Analysing page ${i} of ${S.totalPages}…`);
+
             const hasA = i <= nA, hasB = i <= nB;
-            const imgA = hasA ? await renderPageToData(S.pdfA, i) : null;
-            const imgB = hasB ? await renderPageToData(S.pdfB, i) : null;
-            const textA = hasA ? await extractText(S.pdfA, i) : '';
-            const textB = hasB ? await extractText(S.pdfB, i) : '';
+
+            // 1. Extract text with positions
+            const getItems = async (pdf, n) => {
+                if (S.ocrEnabled && S.TesseractLib) return extractTextOCR(pdf, n);
+                return extractTextItems(pdf, n);
+            };
+            const { items: itemsA, fullText: textA } = hasA ? await getItems(S.pdfA, i) : { items: [], fullText: '' };
+            const { items: itemsB, fullText: textB } = hasB ? await getItems(S.pdfB, i) : { items: [], fullText: '' };
+
+            // 2. Text diff
             const { html: diffHtml, added: addedWords, removed: removedWords } = buildTextDiff(textA, textB);
 
+            // 3. Text highlight positions (green/red rectangles on the PDF)
+            const { hlA, hlB } = computeTextHighlights(textA, itemsA, textB, itemsB);
+
+            // 4. Render pages (clean imageData for pixelmatch)
+            const imgA = hasA ? await renderPageToData(S.pdfA, i) : null;
+            const imgB = hasB ? await renderPageToData(S.pdfB, i) : null;
+
+            // 5. Visual diff via worker
             let status = 'unchanged', diffRatio = 0, diffCanvas = null;
             if (!hasA) { status = 'added'; }
             else if (!hasB) { status = 'removed'; }
@@ -219,7 +297,13 @@ async function runComparison() {
                 diffRatio = vd.ratio; diffCanvas = vd.diffCanvas;
                 if (diffRatio > 0.001 || addedWords > 0 || removedWords > 0) status = 'changed';
             }
-            S.results.push({ i, status, diffRatio, addedWords, removedWords, diffHtml, textA, textB, imgA, imgB, diffCanvas });
+
+            S.results.push({
+                i, status, diffRatio, addedWords, removedWords,
+                diffHtml, textA, textB,
+                imgA, imgB, diffCanvas,
+                hlA, hlB,   // ← text highlight regions
+            });
         }
 
         if (!S.cancelled) { setProgress(100, 'Done!'); renderResults(); }
@@ -247,8 +331,7 @@ function renderResults() {
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
 function updateSidebarStats() {
-    const total = S.results.length;
-    $('cmp-stat-total').textContent     = total;
+    $('cmp-stat-total').textContent     = S.results.length;
     $('cmp-stat-changed').textContent   = S.results.filter(r => r.status === 'changed').length;
     $('cmp-stat-unchanged').textContent = S.results.filter(r => r.status === 'unchanged').length;
     $('cmp-stat-added').textContent     = S.results.filter(r => r.status === 'added').length;
@@ -261,8 +344,7 @@ function statusBadgeClass(s) {
 
 // ── Pages list ────────────────────────────────────────────────────────────────
 function renderPagesList() {
-    const ul = $('cmp-pages-list');
-    ul.innerHTML = '';
+    const ul = $('cmp-pages-list'); ul.innerHTML = '';
     S.results.forEach(r => {
         const li = document.createElement('li');
         li.className = 'list-group-item list-group-item-action py-1 px-2 d-flex justify-content-between align-items-center';
@@ -284,9 +366,11 @@ function renderContinuousViewer() {
     S.results.forEach(r => {
         const bL = makePageBlock(r.i), bR = makePageBlock(r.i);
         left.appendChild(bL); right.appendChild(bR);
-        if (r.imgA) drawPageBlock(bL, r.imgA, r.diffCanvas);
+
+        if (r.imgA) drawPageBlock(bL, r.imgA, r.diffCanvas, r.hlA, 'rgba(220,60,60,0.32)');
         else bL.appendChild(makePlaceholder('No page'));
-        if (r.imgB) drawPageBlock(bR, r.imgB, r.diffCanvas);
+
+        if (r.imgB) drawPageBlock(bR, r.imgB, null, r.hlB, 'rgba(34,197,94,0.32)');
         else bR.appendChild(makePlaceholder('No page'));
     });
 
@@ -303,15 +387,33 @@ function makePageBlock(pg) {
     wrap.appendChild(lbl); return wrap;
 }
 
-function drawPageBlock(block, imgData, diffCanvas) {
-    const w = Math.round(imgData.width * S.zoom), h = Math.round(imgData.height * S.zoom);
+function drawPageBlock(block, imgData, diffCanvas, textHighlights, hlColor) {
+    const w = Math.round(imgData.width * S.zoom);
+    const h = Math.round(imgData.height * S.zoom);
     block.style.width = w + 'px';
+
+    // Main page canvas
     const canvas = document.createElement('canvas');
     canvas.width = imgData.width; canvas.height = imgData.height;
     canvas.style.cssText = `width:${w}px;height:${h}px;display:block`;
     canvas.getContext('2d').putImageData(imgData.imageData, 0, 0);
     block.appendChild(canvas);
-    if (diffCanvas && S.showDiffOverlay) {
+
+    // Text highlight overlay (green/red rectangles on changed words)
+    if (S.showTextHighlights && textHighlights && textHighlights.length > 0) {
+        const hlCanvas = document.createElement('canvas');
+        hlCanvas.width = imgData.width; hlCanvas.height = imgData.height;
+        hlCanvas.style.cssText = `position:absolute;top:0;left:0;width:${w}px;height:${h}px;pointer-events:none`;
+        const ctx = hlCanvas.getContext('2d');
+        ctx.fillStyle = hlColor;
+        for (const hl of textHighlights) {
+            ctx.fillRect(hl.x, hl.y, hl.w, hl.h);
+        }
+        block.appendChild(hlCanvas);
+    }
+
+    // Pixelmatch overlay (red diff pixels)
+    if (S.showDiffOverlay && diffCanvas) {
         const ov = document.createElement('canvas');
         ov.className = 'cmp-diff-overlay';
         ov.width = diffCanvas.width; ov.height = diffCanvas.height;
@@ -324,7 +426,7 @@ function makePlaceholder(text) {
     const d = document.createElement('div'); d.className = 'cmp-page-placeholder'; d.textContent = text; return d;
 }
 
-// ── Sync scroll (fixed — no smooth scroll on panels) ─────────────────────────
+// ── Sync scroll ───────────────────────────────────────────────────────────────
 function setupSyncScroll() {
     const L = $('cmp-panel-left'), R = $('cmp-panel-right');
     const sync = (src, tgt) => {
@@ -392,6 +494,10 @@ $('cmp-show-diff-overlay').addEventListener('change', e => {
     S.showDiffOverlay = e.target.checked;
     if (S.results.length) renderContinuousViewer();
 });
+$('cmp-show-text-hl').addEventListener('change', e => {
+    S.showTextHighlights = e.target.checked;
+    if (S.results.length) renderContinuousViewer();
+});
 $('cmp-changed-only').addEventListener('change', e => { S.changedOnly = e.target.checked; updateChangedOnlyFilter(); });
 
 function updateChangedOnlyFilter() {
@@ -443,7 +549,7 @@ function activateSidebarTab(name) {
 }
 document.querySelectorAll('.cmp-stab').forEach(btn => btn.addEventListener('click', () => activateSidebarTab(btn.dataset.stab)));
 
-// ── Text diff ─────────────────────────────────────────────────────────────────
+// ── Text diff panel ───────────────────────────────────────────────────────────
 function renderTextDiffPage(pg) {
     S.textPage = pg; $('cmp-text-page-cur').textContent = pg;
     const r = S.results[pg - 1];
@@ -456,7 +562,7 @@ function renderTextDiffPage(pg) {
 $('cmp-text-prev').addEventListener('click', () => { if (S.textPage > 1) renderTextDiffPage(S.textPage - 1); });
 $('cmp-text-next').addEventListener('click', () => { if (S.textPage < S.totalPages) renderTextDiffPage(S.textPage + 1); });
 
-// ── Overlay ───────────────────────────────────────────────────────────────────
+// ── Overlay panel ─────────────────────────────────────────────────────────────
 function renderOverlayPage(pg) {
     S.overlayPage = pg; $('cmp-overlay-page-cur').textContent = pg;
     const r = S.results[pg - 1]; const container = $('cmp-overlay-container'); container.innerHTML = '';
@@ -467,12 +573,13 @@ function renderOverlayPage(pg) {
     container.appendChild(canvas); drawOverlay(canvas, r);
 }
 function drawOverlay(canvas, r) {
-    const ctx = canvas.getContext('2d'); const w = canvas.width, h = canvas.height; ctx.clearRect(0, 0, w, h);
+    const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
     const draw = (imgData, opacity, blend) => {
         if (!imgData) return;
         const tmp = document.createElement('canvas'); tmp.width = imgData.width; tmp.height = imgData.height;
         tmp.getContext('2d').putImageData(imgData.imageData, 0, 0);
-        ctx.save(); ctx.globalAlpha = opacity; ctx.globalCompositeOperation = blend; ctx.drawImage(tmp, 0, 0, w, h); ctx.restore();
+        ctx.save(); ctx.globalAlpha = opacity; ctx.globalCompositeOperation = blend;
+        ctx.drawImage(tmp, 0, 0, canvas.width, canvas.height); ctx.restore();
     };
     draw(r.imgA, parseFloat($('cmp-opacity-a').value), 'source-over');
     draw(r.imgB, parseFloat($('cmp-opacity-b').value), $('cmp-blend-mode').value);
@@ -529,7 +636,7 @@ $('cmp-export-html').addEventListener('click', () => {
     });
     document.addEventListener('mousemove', e => {
         if (!dragging) return;
-        const total = divider.parentElement.offsetWidth - $('cmp-panel-divider').offsetWidth - document.querySelector('.cmp-right-sidebar').offsetWidth;
+        const total = divider.parentElement.offsetWidth - divider.offsetWidth - document.querySelector('.cmp-right-sidebar').offsetWidth;
         const newW = Math.max(80, Math.min(total - 80, startW + e.clientX - startX));
         const L = $('cmp-panel-left'); L.style.flex = 'none'; L.style.width = newW + 'px';
         $('cmp-panel-right').style.flex = '1';
