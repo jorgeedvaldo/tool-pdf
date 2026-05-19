@@ -1,7 +1,8 @@
 // ═══════════════════════════════════════════════════════════════════════════
 //  PDF ⇄ Word conversion tool
-//  PDF → DOCX  : pdf.js (text extraction) + docx (build .docx)
-//  DOCX → PDF  : mammoth.js (parse .docx → HTML) + html2pdf.js (render to PDF)
+//  PDF → RTF   : pdf.js (text extraction) + pure-JS RTF builder (no library)
+//  DOCX → PDF  : mammoth.js (parse .docx → HTML) + html2canvas + jsPDF
+//  All libraries loaded from cdnjs — no unpkg/jsdelivr dependency.
 // ═══════════════════════════════════════════════════════════════════════════
 
 const $ = id => document.getElementById(id);
@@ -24,7 +25,7 @@ function setMode(newMode) {
 
 setMode(mode);
 
-// ── File handling (works for both modes) ─────────────────────────────────────
+// ── File handling ─────────────────────────────────────────────────────────────
 function setupDropZone(zoneId, inputId) {
     const zone  = $(zoneId);
     const input = $(inputId);
@@ -38,27 +39,23 @@ function setupDropZone(zoneId, inputId) {
     });
     input.addEventListener('change', e => e.target.files[0] && onFileSelected(e.target.files[0]));
 }
-setupDropZone('cw-pw-zone',  'cw-pw-input');
-setupDropZone('cw-wp-zone',  'cw-wp-input');
+setupDropZone('cw-pw-zone', 'cw-pw-input');
+setupDropZone('cw-wp-zone', 'cw-wp-input');
 
 function onFileSelected(file) {
     const isPdf  = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
     const isDocx = file.name.toLowerCase().endsWith('.docx');
 
-    if (mode === 'pdf-to-word' && !isPdf) {
-        showError('Selecione um ficheiro PDF.'); return;
-    }
-    if (mode === 'word-to-pdf' && !isDocx) {
-        showError('Selecione um ficheiro .docx (Word). .doc antigo não é suportado.'); return;
-    }
+    if (mode === 'pdf-to-word' && !isPdf)  { showError('Selecione um ficheiro PDF.'); return; }
+    if (mode === 'word-to-pdf' && !isDocx) { showError('Selecione um ficheiro .docx. O formato .doc antigo não é suportado.'); return; }
 
     selectedFile = file;
     hideError();
 
-    const card    = mode === 'pdf-to-word' ? $('cw-pw-card') : $('cw-wp-card');
-    const zone    = mode === 'pdf-to-word' ? $('cw-pw-zone') : $('cw-wp-zone');
-    const nameEl  = mode === 'pdf-to-word' ? $('cw-pw-name') : $('cw-wp-name');
-    const sizeEl  = mode === 'pdf-to-word' ? $('cw-pw-size') : $('cw-wp-size');
+    const card     = mode === 'pdf-to-word' ? $('cw-pw-card')   : $('cw-wp-card');
+    const zone     = mode === 'pdf-to-word' ? $('cw-pw-zone')   : $('cw-wp-zone');
+    const nameEl   = mode === 'pdf-to-word' ? $('cw-pw-name')   : $('cw-wp-name');
+    const sizeEl   = mode === 'pdf-to-word' ? $('cw-pw-size')   : $('cw-wp-size');
     const removeEl = mode === 'pdf-to-word' ? $('cw-pw-remove') : $('cw-wp-remove');
 
     nameEl.textContent = file.name;
@@ -79,12 +76,9 @@ function resetFile() {
     hideError();
 }
 
-// ── UI helpers ───────────────────────────────────────────────────────────────
-function showError(msg) {
-    const e = $('cw-error');
-    e.textContent = msg; e.classList.remove('d-none');
-}
-function hideError() { $('cw-error').classList.add('d-none'); }
+// ── UI helpers ────────────────────────────────────────────────────────────────
+function showError(msg) { const e = $('cw-error'); e.textContent = msg; e.classList.remove('d-none'); }
+function hideError()    { $('cw-error').classList.add('d-none'); }
 
 function setProgress(pct, msg) {
     $('cw-progress').classList.remove('d-none');
@@ -92,13 +86,13 @@ function setProgress(pct, msg) {
     $('cw-progress-msg').textContent = msg || '';
 }
 
-// ── Convert button ───────────────────────────────────────────────────────────
+// ── Convert button ────────────────────────────────────────────────────────────
 $('cw-convert-btn').addEventListener('click', async () => {
     if (!selectedFile) return;
     $('cw-convert-btn').disabled = true;
     hideError();
     try {
-        if (mode === 'pdf-to-word') await convertPdfToWord(selectedFile);
+        if (mode === 'pdf-to-word') await convertPdfToRtf(selectedFile);
         else                        await convertWordToPdf(selectedFile);
     } catch (err) {
         console.error(err);
@@ -109,220 +103,213 @@ $('cw-convert-btn').addEventListener('click', async () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  PDF → WORD
+//  PDF → RTF  (pure JavaScript — no external library required)
+//  RTF opens natively in Microsoft Word, LibreOffice Writer, and WordPad.
 // ═══════════════════════════════════════════════════════════════════════════
-async function convertPdfToWord(file) {
-    setProgress(5, 'A carregar PDF…');
-    const ab = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(ab) }).promise;
-    const includeImages = $('cw-include-images')?.checked;
-
-    if (!window.docx) {
-        throw new Error('Biblioteca docx não carregou. Verifique sua conexão e recarregue a página.');
+function escapeRtf(str) {
+    let out = '';
+    for (const ch of str) {
+        const code = ch.charCodeAt(0);
+        if      (ch === '\\') out += '\\\\';
+        else if (ch === '{' ) out += '\\{';
+        else if (ch === '}' ) out += '\\}';
+        else if (code > 127 ) out += `\\u${code}?`;   // Unicode escape, '?' is RTF fallback char
+        else                  out += ch;
     }
-    const { Document, Packer, Paragraph, TextRun, AlignmentType, PageBreak, ImageRun } = window.docx;
+    return out;
+}
 
-    const sections = [];
+async function convertPdfToRtf(file) {
+    setProgress(5, 'A carregar PDF…');
+    const ab  = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(ab) }).promise;
+
+    let body = '';
+
     for (let p = 1; p <= pdf.numPages; p++) {
-        setProgress(5 + Math.round((p / pdf.numPages) * 80), `A processar página ${p} de ${pdf.numPages}…`);
-        const page = await pdf.getPage(p);
-        const vp = page.getViewport({ scale: 1 });
-        const tc = await page.getTextContent();
+        setProgress(5 + Math.round((p / pdf.numPages) * 85),
+            `A processar página ${p} de ${pdf.numPages}…`);
 
-        // Group items into lines by Y baseline (tolerant of small jitter)
+        const page = await pdf.getPage(p);
+        const vp   = page.getViewport({ scale: 1 });
+        const tc   = await page.getTextContent();
+
+        // ── Group text items into lines by Y baseline ─────────────────────
         const lines = [];
         for (const it of tc.items) {
-            if (!it.str) continue;
-            const y = it.transform[5];                              // baseline Y in PDF pts (origin bottom-left)
-            const x = it.transform[4];
-            const fs = Math.hypot(it.transform[0], it.transform[1]); // font size pt
-            // find a line within fs * 0.5 of this baseline
+            if (!it.str || !it.str.trim()) continue;
+            const y  = it.transform[5];
+            const x  = it.transform[4];
+            const fs = Math.abs(it.transform[0]) || Math.abs(it.transform[3]) || 12;
             let line = lines.find(l => Math.abs(l.y - y) < fs * 0.6);
             if (!line) { line = { y, items: [] }; lines.push(line); }
-            line.items.push({ x, y, str: it.str, fontSize: fs, font: it.fontName });
+            line.items.push({ x, str: it.str, fontSize: fs });
         }
-        // Sort lines top-down (PDF Y decreases downward in our reading order)
         lines.sort((a, b) => b.y - a.y);
-        // Sort items within each line left-to-right
         lines.forEach(l => l.items.sort((a, b) => a.x - b.x));
 
-        // Build paragraphs — join consecutive lines that are close (< 1.7 × avg fontSize)
+        // ── Build paragraphs ──────────────────────────────────────────────
         const paragraphs = [];
-        let curr = null;
-        let prevY = null, prevFS = null;
+        let curr = null, prevY = null, prevFS = null;
+
         for (const line of lines) {
-            const text = line.items.map(it => it.str).join('').replace(/\s+/g, ' ').trim();
-            if (!text) {
-                if (curr) { paragraphs.push(curr); curr = null; }
-                continue;
-            }
-            const avgFS = line.items.reduce((a, b) => a + b.fontSize, 0) / line.items.length;
-            const gap = prevY != null ? prevY - line.y : 0;
-            // New paragraph when line gap > 1.7× the previous font size or when font size jumps
-            const isNewParagraph = !curr || (prevFS && (gap > prevFS * 1.7 || Math.abs(avgFS - prevFS) > 2));
-            // Detect alignment: middle of line vs page width
+            const text  = line.items.map(it => it.str).join('').replace(/\s+/g, ' ').trim();
+            if (!text) { if (curr) { paragraphs.push(curr); curr = null; } continue; }
+
+            const avgFS  = line.items.reduce((a, b) => a + b.fontSize, 0) / line.items.length;
+            const gap    = prevY != null ? prevY - line.y : 0;
+            const isNew  = !curr || (prevFS && (gap > prevFS * 1.7 || Math.abs(avgFS - prevFS) > 2));
+
+            // Alignment detection
             const lineLeft  = line.items[0].x;
             const lineRight = line.items[line.items.length - 1].x +
                 (line.items[line.items.length - 1].str.length * avgFS * 0.5);
             const lineMid = (lineLeft + lineRight) / 2;
-            let align = AlignmentType.LEFT;
-            if (Math.abs(lineMid - vp.width / 2) < vp.width * 0.06 && lineLeft > vp.width * 0.18) align = AlignmentType.CENTER;
-            else if (vp.width - lineRight < vp.width * 0.06 && lineLeft > vp.width * 0.3) align = AlignmentType.RIGHT;
+            let align = 'l';
+            if (Math.abs(lineMid - vp.width / 2) < vp.width * 0.06 && lineLeft > vp.width * 0.18)
+                align = 'c';
+            else if (lineRight > vp.width * 0.85 && lineLeft > vp.width * 0.4)
+                align = 'r';
 
-            if (isNewParagraph) {
-                curr = { runs: [], align, fontSize: avgFS };
-                paragraphs.push(curr);
-            }
-            // Append text (with space if continuation)
-            curr.runs.push(new TextRun({
-                text: (curr.runs.length ? ' ' : '') + text,
-                size: Math.max(16, Math.round(avgFS * 2)), // docx uses half-points
-            }));
+            if (isNew) { curr = { text: '', align, fontSize: avgFS }; paragraphs.push(curr); }
+            curr.text += (curr.text ? ' ' : '') + text;
             prevY = line.y; prevFS = avgFS;
         }
 
-        const children = paragraphs.map(par => new Paragraph({
-            alignment: par.align,
-            children: par.runs.length ? par.runs : [new TextRun('')],
-            spacing: { after: 120 },
-        }));
-        if (children.length === 0) children.push(new Paragraph({ children: [new TextRun('')] }));
-
-        // Optionally embed page image
-        if (includeImages) {
-            try {
-                const imgVp = page.getViewport({ scale: 1.5 });
-                const c = document.createElement('canvas');
-                c.width = imgVp.width; c.height = imgVp.height;
-                await page.render({ canvasContext: c.getContext('2d'), viewport: imgVp }).promise;
-                const blob = await new Promise(res => c.toBlob(res, 'image/png'));
-                const buf  = await blob.arrayBuffer();
-                children.unshift(new Paragraph({
-                    children: [new ImageRun({
-                        data: buf,
-                        type: 'png',
-                        transformation: { width: 580, height: Math.round(580 * imgVp.height / imgVp.width) },
-                    })],
-                    spacing: { after: 200 },
-                }));
-            } catch (e) { console.warn('Falha ao embutir imagem da página', p, e); }
+        // ── Emit RTF paragraphs ───────────────────────────────────────────
+        for (const par of paragraphs) {
+            const q  = par.align === 'c' ? '\\qc' : par.align === 'r' ? '\\qr' : '\\ql';
+            const fs = Math.max(16, Math.round(par.fontSize * 2)); // RTF uses half-points
+            body += `\\pard${q}\\f0\\fs${fs} ${escapeRtf(par.text)}\\par\n`;
         }
 
-        sections.push({
-            properties: { page: { margin: { top: 720, right: 720, bottom: 720, left: 720 } } },
-            children,
-        });
+        if (p < pdf.numPages) body += '\\page\n';
     }
 
-    setProgress(90, 'A gerar ficheiro Word…');
-    const doc = new Document({
-        creator: 'ToolPDF', title: file.name.replace(/\.pdf$/i, ''),
-        sections,
-    });
-    const blob = await Packer.toBlob(doc);
+    setProgress(95, 'A gerar ficheiro…');
+
+    const rtf  = `{\\rtf1\\ansi\\deff0\n` +
+                 `{\\fonttbl{\\f0\\froman\\fcharset0 Times New Roman;}}\n` +
+                 `{\\colortbl ;\\red0\\green0\\blue0;}\n` +
+                 body +
+                 `}`;
+    const blob = new Blob([rtf], { type: 'application/rtf' });
     setProgress(100, 'Pronto.');
-    downloadBlob(blob, file.name.replace(/\.pdf$/i, '') + '.docx');
+    downloadBlob(blob, file.name.replace(/\.pdf$/i, '') + '.rtf');
     setTimeout(() => $('cw-progress').classList.add('d-none'), 1500);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  WORD (.docx) → PDF
+//  mammoth.js → HTML  |  html2canvas → canvas  |  jsPDF → PDF
+//  All three libraries loaded from cdnjs (same CDN as pdf.js).
 // ═══════════════════════════════════════════════════════════════════════════
 async function convertWordToPdf(file) {
+    if (!window.mammoth)   throw new Error('mammoth não carregou. Verifique a ligação e recarregue.');
+    if (!window.html2canvas) throw new Error('html2canvas não carregou. Verifique a ligação e recarregue.');
+    if (!window.jspdf)     throw new Error('jsPDF não carregou. Verifique a ligação e recarregue.');
+
     setProgress(5, 'A ler ficheiro Word…');
     const ab = await file.arrayBuffer();
-    setProgress(25, 'A extrair conteúdo do documento…');
 
-    // Convert .docx → HTML (mammoth preserves headings, bold/italic, lists, tables, images)
+    setProgress(20, 'A extrair conteúdo…');
     const result = await mammoth.convertToHtml(
         { arrayBuffer: ab },
-        {
-            styleMap: [
-                "p[style-name='Heading 1'] => h1:fresh",
-                "p[style-name='Heading 2'] => h2:fresh",
-                "p[style-name='Heading 3'] => h3:fresh",
-                "p[style-name='Heading 4'] => h4:fresh",
-                "p[style-name='Title'] => h1.title:fresh",
-                "p[style-name='Quote'] => blockquote",
-            ],
-        }
+        { styleMap: [
+            "p[style-name='Heading 1'] => h1:fresh",
+            "p[style-name='Heading 2'] => h2:fresh",
+            "p[style-name='Heading 3'] => h3:fresh",
+            "p[style-name='Heading 4'] => h4:fresh",
+            "p[style-name='Title']     => h1.doc-title:fresh",
+            "p[style-name='Quote']     => blockquote",
+        ]}
     );
     const html = (result.value || '').trim();
-    if (!html) {
-        throw new Error('O documento Word parece estar vazio ou sem conteúdo textual extraível.');
-    }
+    if (!html) throw new Error('O documento parece estar vazio ou sem texto extraível.');
 
-    setProgress(45, 'A montar página…');
+    setProgress(40, 'A montar página…');
 
-    // Build a printable container styled like an A4 document.
-    // Wrap it in a zero-height overflow:hidden parent so it's invisible to the
-    // user but still fully laid-out in the DOM (html2canvas needs computed
-    // dimensions — opacity:0 or extreme negative offsets produce blank renders).
-    const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'position:fixed;top:0;left:0;width:794px;height:0;overflow:hidden;z-index:-1;pointer-events:none;';
-    document.body.appendChild(wrapper);
-
+    // Build A4-width container. position:absolute + left:-9999px keeps it
+    // off-screen but fully laid-out — html2canvas captures it via element ref.
     const container = document.createElement('div');
-    container.id = 'cw-render-target';
-    container.style.cssText = `
-        width: 794px; padding: 48px 56px; background: #ffffff; color: #111;
-        font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5;
-        box-sizing: border-box;
+    container.style.cssText = [
+        'width:794px', 'padding:56px 64px', 'background:#fff', 'color:#111',
+        "font-family:'Times New Roman',serif", 'font-size:12pt', 'line-height:1.6',
+        'box-sizing:border-box', 'position:absolute', 'left:-9999px', 'top:0',
+    ].join(';');
+
+    // Embed styles directly so they're scoped to the container
+    const style = document.createElement('style');
+    style.textContent = `
+        .cw-rt h1{font-size:22pt;margin:0 0 10pt;font-weight:700;line-height:1.2}
+        .cw-rt h2{font-size:16pt;margin:16pt 0 8pt;font-weight:700}
+        .cw-rt h3{font-size:13pt;margin:13pt 0 6pt;font-weight:700}
+        .cw-rt h4{font-size:11pt;margin:10pt 0 5pt;font-weight:700}
+        .cw-rt p{margin:0 0 8pt}
+        .cw-rt ul,.cw-rt ol{margin:0 0 8pt 22pt}
+        .cw-rt li{margin-bottom:3pt}
+        .cw-rt table{border-collapse:collapse;margin:0 0 10pt;width:100%}
+        .cw-rt td,.cw-rt th{border:1px solid #555;padding:4pt 7pt;vertical-align:top}
+        .cw-rt img{max-width:100%;height:auto;display:block}
+        .cw-rt blockquote{margin:0 0 8pt 18pt;padding-left:10pt;border-left:3px solid #999;color:#555;font-style:italic}
+        .cw-rt strong{font-weight:700}
+        .cw-rt em{font-style:italic}
     `;
-    wrapper.appendChild(container);
-    container.innerHTML = `
-        <style>
-            #cw-render-target h1 { font-size: 24pt; margin: 0 0 12pt; font-weight: 700; }
-            #cw-render-target h2 { font-size: 18pt; margin: 18pt 0 10pt; font-weight: 700; }
-            #cw-render-target h3 { font-size: 14pt; margin: 14pt 0 8pt; font-weight: 700; }
-            #cw-render-target h4 { font-size: 12pt; margin: 12pt 0 8pt; font-weight: 700; }
-            #cw-render-target p  { margin: 0 0 9pt; text-align: justify; }
-            #cw-render-target ul, #cw-render-target ol { margin: 0 0 9pt 24pt; }
-            #cw-render-target li { margin-bottom: 4pt; }
-            #cw-render-target table { border-collapse: collapse; margin: 0 0 10pt; }
-            #cw-render-target table td, #cw-render-target table th { border: 1px solid #444; padding: 4pt 6pt; vertical-align: top; }
-            #cw-render-target img { max-width: 100%; height: auto; }
-            #cw-render-target blockquote { margin: 0 0 9pt 20pt; padding-left: 12pt; border-left: 3px solid #888; color: #444; font-style: italic; }
-            #cw-render-target a { color: #0d6efd; text-decoration: underline; }
-            #cw-render-target strong { font-weight: 700; }
-            #cw-render-target em { font-style: italic; }
-        </style>
-        ${html}
-    `;
+    const inner = document.createElement('div');
+    inner.className = 'cw-rt';
+    inner.innerHTML = html;
+    container.appendChild(style);
+    container.appendChild(inner);
     document.body.appendChild(container);
 
-    // Wait for any embedded images to load
+    // Wait for embedded images
     await Promise.all(Array.from(container.querySelectorAll('img')).map(img =>
         img.complete ? Promise.resolve()
-                     : new Promise(res => { img.onload = img.onerror = res; })));
+                     : new Promise(r => { img.onload = img.onerror = r; })));
 
-    setProgress(65, 'A gerar PDF…');
+    setProgress(60, 'A renderizar…');
 
-    const opts = {
-        margin: 0,
-        filename: file.name.replace(/\.docx$/i, '') + '.pdf',
-        image:    { type: 'jpeg', quality: 0.96 },
-        html2canvas: {
-            scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff',
-            width: 794, windowWidth: 794,
-        },
-        jsPDF:    { unit: 'pt', format: 'a4', orientation: 'portrait', compress: true },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
-    };
-
+    let canvas;
     try {
-        await html2pdf().set(opts).from(container).save();
-        setProgress(100, 'Pronto.');
+        canvas = await html2canvas(container, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            width: 794,
+            windowWidth: 794,
+        });
     } finally {
-        wrapper.remove();
+        document.body.removeChild(container);
     }
+
+    setProgress(80, 'A gerar PDF…');
+
+    const { jsPDF } = window.jspdf;
+    const pdf  = new jsPDF({ unit: 'pt', format: 'a4', orientation: 'portrait', compress: true });
+    const pgW  = pdf.internal.pageSize.getWidth();
+    const pgH  = pdf.internal.pageSize.getHeight();
+    const imgW = pgW;
+    const imgH = canvas.height * pgW / canvas.width;
+    const imgData = canvas.toDataURL('image/jpeg', 0.93);
+
+    // Slice canvas across pages
+    let sliceY = 0;
+    while (sliceY < imgH) {
+        if (sliceY > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, -sliceY, imgW, imgH);
+        sliceY += pgH;
+    }
+
+    setProgress(100, 'Pronto.');
+    pdf.save(file.name.replace(/\.docx$/i, '') + '.pdf');
     setTimeout(() => $('cw-progress').classList.add('d-none'), 1500);
 }
 
-// ── Download helper ──────────────────────────────────────────────────────────
+// ── Download helper ───────────────────────────────────────────────────────────
 function downloadBlob(blob, filename) {
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a   = document.createElement('a');
     a.href = url; a.download = filename;
     document.body.appendChild(a); a.click();
     document.body.removeChild(a);

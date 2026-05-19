@@ -69,7 +69,7 @@
                 </h1>
                 <p class="mb-3" style="opacity:.9;font-size:1rem">
                     {{ $mode === 'pdf-to-word'
-                        ? 'Convert PDF documents to editable Word (.docx) directly in your browser.'
+                        ? 'Convert PDF documents to editable RTF files (opens in Word, LibreOffice) directly in your browser.'
                         : 'Convert Word (.docx) documents to clean PDF files directly in your browser.' }}
                 </p>
                 <div class="d-flex flex-wrap gap-1">
@@ -227,11 +227,14 @@
 </div>
 
 @push('scripts')
+{{-- pdf.js: extract text from PDF pages --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
-<script src="https://cdn.jsdelivr.net/npm/docx@6.5.0/build/index.umd.min.js"></script>
-<script src="https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js"></script>
-<script src="https://unpkg.com/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+{{-- mammoth: parse .docx → HTML (Word→PDF direction) --}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+{{-- html2canvas + jsPDF: render HTML → PDF (Word→PDF direction) --}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>window.CW_INITIAL_MODE = @json($mode);</script>
 <script src="{{ asset('js/tools/convert-pdf-word.js') }}"></script>
 @endpush
