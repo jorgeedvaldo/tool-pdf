@@ -45,8 +45,8 @@ class PdfWordConverterTest extends TestCase
 
         // pdf.js for text extraction
         $response->assertSee('pdf.min.js', false);
-        // docx.js for Word document generation
-        $response->assertSee('docx', false);
+        // docx.js UMD for Word document generation
+        $response->assertSee('docx@6.5.0', false);
         // The converter script itself
         $response->assertSee('convert-pdf-word.js', false);
     }
