@@ -6,10 +6,15 @@ const pendingDiffs = new Map();
 let diffIdCounter = 0;
 
 diffWorker.onmessage = ({ data }) => {
-    if (data.type !== 'result') return;
     const resolve = pendingDiffs.get(data.id);
     if (!resolve) return;
     pendingDiffs.delete(data.id);
+    if (data.type === 'error') {
+        // Graceful fallback: treat page as having 0 diff
+        console.warn('pixelmatch error (page skipped):', data.message);
+        resolve({ diffOut: new Uint8ClampedArray(0).buffer, ratio: 0 });
+        return;
+    }
     resolve(data);
 };
 diffWorker.onerror = e => console.error('Diff worker error:', e);
@@ -28,8 +33,15 @@ function runVisualDiff(imgA, imgB, threshold) {
             return c.getContext('2d').getImageData(0, 0, w, h).data;
         };
 
-        const bufA = normalise(imgA.imageData, imgA.width, imgA.height).buffer.slice(0);
-        const bufB = normalise(imgB.imageData, imgB.width, imgB.height).buffer.slice(0);
+        // ImageData.data.buffer may be larger than w*h*4 due to browser padding —
+        // create an exact-size copy so pixelmatch never sees a size mismatch.
+        const exactCopy = arr => {
+            const out = new Uint8ClampedArray(w * h * 4);
+            out.set(new Uint8ClampedArray(arr.buffer, arr.byteOffset, Math.min(arr.byteLength, w * h * 4)));
+            return out.buffer;
+        };
+        const bufA = exactCopy(normalise(imgA.imageData, imgA.width, imgA.height));
+        const bufB = exactCopy(normalise(imgB.imageData, imgB.width, imgB.height));
         const id = diffIdCounter++;
 
         pendingDiffs.set(id, ({ diffOut, ratio }) => {
