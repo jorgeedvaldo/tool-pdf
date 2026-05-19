@@ -3,12 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Symfony\Component\Process\Process;
+use PhpOffice\PhpWord\IOFactory as WordIOFactory;
+use PhpOffice\PhpWord\Settings as WordSettings;
+use Smalot\PdfParser\Parser as PdfParser;
 
 class ConvertController extends Controller
 {
     private const MAX_MB = 50;
 
+    // ─────────────────────────────────────────────────────────────────────────
+    //  PDF → Word (.docx)
+    //  Uses smalot/pdfparser to extract text + phpoffice/phpword to write docx.
+    // ─────────────────────────────────────────────────────────────────────────
     public function pdfToWord(Request $request)
     {
         $request->validate([
@@ -18,28 +24,74 @@ class ConvertController extends Controller
         $tmpDir = $this->makeTmpDir();
 
         try {
-            $request->file('file')->move($tmpDir, 'input.pdf');
             $inputPath  = $tmpDir . '/input.pdf';
-            $outputPath = $tmpDir . '/input.docx';
+            $outputPath = $tmpDir . '/output.docx';
+            $request->file('file')->move($tmpDir, 'input.pdf');
 
-            $this->runLibreOffice([
-                '--infilter=writer_pdf_import',
-                '--convert-to', 'docx',
-                '--outdir', $tmpDir,
-                $inputPath,
-            ], $tmpDir);
+            // Parse PDF
+            $parser  = new PdfParser();
+            $pdf     = $parser->parseFile($inputPath);
+            $pages   = $pdf->getPages();
 
-            if (!file_exists($outputPath)) {
-                return response()->json(['error' => 'Conversão falhou: ficheiro de saída não foi gerado.'], 500);
+            // Build Word document
+            $phpWord = new \PhpOffice\PhpWord\PhpWord();
+            $phpWord->getDefaultFontName('Times New Roman');
+            $phpWord->setDefaultFontSize(12);
+
+            $sectionStyle = [
+                'marginTop'    => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2.5),
+                'marginBottom' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2.5),
+                'marginLeft'   => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2.5),
+                'marginRight'  => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2.5),
+            ];
+
+            foreach ($pages as $i => $page) {
+                $section = $phpWord->addSection($sectionStyle);
+
+                $rawText = $page->getText();
+                if (!$rawText) continue;
+
+                // Split into paragraphs on blank lines or line breaks
+                $paragraphs = preg_split('/\n{2,}/', trim($rawText));
+
+                foreach ($paragraphs as $para) {
+                    $para = trim(preg_replace('/[ \t]+/', ' ', $para));
+                    if ($para === '') {
+                        $section->addTextBreak();
+                        continue;
+                    }
+                    // Detect heading heuristic: short line (<80 chars), all caps or ends without punctuation
+                    $isHeading = (mb_strlen($para) < 80 &&
+                        (mb_strtoupper($para) === $para || !preg_match('/[.,:;!?]$/', $para)));
+
+                    if ($isHeading && mb_strlen($para) < 60) {
+                        $section->addText($para, ['bold' => true, 'size' => 14]);
+                    } else {
+                        // Split into lines and add with spacing
+                        $lines = explode("\n", $para);
+                        $text  = implode(' ', array_map('trim', $lines));
+                        $section->addText($text, ['size' => 12], ['spaceAfter' => 120]);
+                    }
+                }
+
+                // Page break between pages (except last)
+                if ($i < count($pages) - 1) {
+                    $section->addPageBreak();
+                }
             }
+
+            if (count($phpWord->getSections()) === 0) {
+                $phpWord->addSection($sectionStyle)->addText('(Documento sem texto extraível)');
+            }
+
+            $writer = WordIOFactory::createWriter($phpWord, 'Word2007');
+            $writer->save($outputPath);
 
             $name = pathinfo($request->file('file')->getClientOriginalName(), PATHINFO_FILENAME);
 
-            return response()
-                ->download($outputPath, $name . '.docx', [
-                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                ])
-                ->deleteFileAfterSend(false);
+            return response()->download($outputPath, $name . '.docx', [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            ])->deleteFileAfterSend(false);
 
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -48,6 +100,10 @@ class ConvertController extends Controller
         }
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Word → PDF
+    //  Uses phpoffice/phpword to load the .docx, then renders via mPDF.
+    // ─────────────────────────────────────────────────────────────────────────
     public function wordToPdf(Request $request)
     {
         $request->validate([
@@ -56,6 +112,7 @@ class ConvertController extends Controller
 
         $file = $request->file('file');
         $ext  = strtolower($file->getClientOriginalExtension());
+
         if (!in_array($ext, ['docx', 'doc', 'odt', 'rtf'], true)) {
             return response()->json(['error' => 'Formato não suportado. Use .docx, .doc, .odt ou .rtf.'], 422);
         }
@@ -64,25 +121,23 @@ class ConvertController extends Controller
 
         try {
             $inputName = 'input.' . $ext;
+            $inputPath = $tmpDir . '/' . $inputName;
+            $outputPath = $tmpDir . '/output.pdf';
             $file->move($tmpDir, $inputName);
-            $inputPath  = $tmpDir . '/' . $inputName;
-            $outputPath = $tmpDir . '/input.pdf';
 
-            $this->runLibreOffice([
-                '--convert-to', 'pdf',
-                '--outdir', $tmpDir,
-                $inputPath,
-            ], $tmpDir);
+            // Configure PhpWord to use mPDF as PDF renderer
+            WordSettings::setPdfRendererName(WordSettings::PDF_RENDERER_MPDF);
+            WordSettings::setPdfRendererPath(base_path('vendor/mpdf/mpdf'));
 
-            if (!file_exists($outputPath)) {
-                return response()->json(['error' => 'Conversão falhou: ficheiro PDF não foi gerado.'], 500);
-            }
+            $phpWord = WordIOFactory::load($inputPath);
+            $writer  = WordIOFactory::createWriter($phpWord, 'PDF');
+            $writer->save($outputPath);
 
             $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
 
-            return response()
-                ->download($outputPath, $name . '.pdf', ['Content-Type' => 'application/pdf'])
-                ->deleteFileAfterSend(false);
+            return response()->download($outputPath, $name . '.pdf', [
+                'Content-Type' => 'application/pdf',
+            ])->deleteFileAfterSend(false);
 
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -91,51 +146,7 @@ class ConvertController extends Controller
         }
     }
 
-    private function runLibreOffice(array $args, string $homeDir): void
-    {
-        // Use an isolated LibreOffice profile per request to avoid lock conflicts
-        // when multiple conversions run concurrently.
-        $binary = $this->findLibreOffice();
-
-        $cmd = array_merge(
-            [$binary, '--headless', '--norestore', '--nofirststartwizard'],
-            $args
-        );
-
-        $env = array_merge($_ENV, [
-            'HOME'         => $homeDir,
-            'TMPDIR'       => $homeDir,
-            'UserInstallation' => 'file://' . $homeDir . '/lo_profile',
-        ]);
-
-        $process = new Process($cmd, null, $env, null, 120);
-        $process->run();
-
-        if (!$process->isSuccessful()) {
-            throw new \RuntimeException(
-                'LibreOffice error: ' . trim($process->getErrorOutput() ?: $process->getOutput())
-            );
-        }
-    }
-
-    private function findLibreOffice(): string
-    {
-        $candidates = [
-            '/usr/bin/libreoffice',
-            '/usr/bin/soffice',
-            '/usr/local/bin/libreoffice',
-            '/usr/local/bin/soffice',
-            '/opt/libreoffice/program/soffice',
-        ];
-
-        foreach ($candidates as $path) {
-            if (is_executable($path)) {
-                return $path;
-            }
-        }
-
-        throw new \RuntimeException('LibreOffice não encontrado no servidor.');
-    }
+    // ─────────────────────────────────────────────────────────────────────────
 
     private function makeTmpDir(): string
     {
