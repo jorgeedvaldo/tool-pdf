@@ -45,7 +45,13 @@ return [
     
     'pdf_to_images' => 'PDF转图像',
     'pdf_to_images_desc' => '将PDF页面转换为图像。',
-    
+
+    'pdf_to_word' => 'PDF转Word',
+    'pdf_to_word_desc' => '将PDF文档转换为可编辑的Word文件。',
+
+    'word_to_pdf' => 'Word转PDF',
+    'word_to_pdf_desc' => '将Word文档转换为PDF格式。',
+
     'web_to_pdf' => '网页转PDF',
     'web_to_pdf_desc' => '将网站保存为PDF。',
     

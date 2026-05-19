@@ -45,7 +45,13 @@ return [
     
     'pdf_to_images' => 'PDF в изображения',
     'pdf_to_images_desc' => 'Конвертируйте страницы PDF в изображения.',
-    
+
+    'pdf_to_word' => 'PDF в Word',
+    'pdf_to_word_desc' => 'Конвертируйте PDF в редактируемые файлы Word.',
+
+    'word_to_pdf' => 'Word в PDF',
+    'word_to_pdf_desc' => 'Конвертируйте документы Word в формат PDF.',
+
     'web_to_pdf' => 'Веб-страница в PDF',
     'web_to_pdf_desc' => 'Сохраните веб-сайт как PDF.',
     

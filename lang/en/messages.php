@@ -45,7 +45,13 @@ return [
     
     'pdf_to_images' => 'PDF to Images',
     'pdf_to_images_desc' => 'Convert PDF pages into images.',
-    
+
+    'pdf_to_word' => 'PDF to Word',
+    'pdf_to_word_desc' => 'Convert PDF documents to editable Word files.',
+
+    'word_to_pdf' => 'Word to PDF',
+    'word_to_pdf_desc' => 'Convert Word documents to PDF format.',
+
     'web_to_pdf' => 'Webpage to PDF',
     'web_to_pdf_desc' => 'Save a website as a PDF.',
     
