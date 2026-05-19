@@ -1,7 +1,57 @@
-import pixelmatch from 'https://cdn.jsdelivr.net/npm/pixelmatch@6.0.0/+esm';
 import { diffWords } from 'https://cdn.jsdelivr.net/npm/diff@5.2.0/+esm';
 
-// ── State ───────────────────────────────────────────────────────────────────
+// ── Web Worker for visual diff ────────────────────────────────────────────────
+const diffWorker = new Worker(new URL('./compare-pdf-worker.js', import.meta.url), { type: 'module' });
+const pendingDiffs = new Map();
+let diffIdCounter = 0;
+
+diffWorker.onmessage = ({ data }) => {
+    if (data.type !== 'result') return;
+    const resolve = pendingDiffs.get(data.id);
+    if (!resolve) return;
+    pendingDiffs.delete(data.id);
+    resolve(data);
+};
+
+diffWorker.onerror = (e) => console.error('Diff worker error:', e);
+
+function runVisualDiff(imgA, imgB, threshold) {
+    return new Promise((resolve) => {
+        const w = Math.max(imgA.width, imgB.width);
+        const h = Math.max(imgA.height, imgB.height);
+
+        const normalise = (src, sw, sh) => {
+            if (sw === w && sh === h) return src.data;
+            const c = document.createElement('canvas'); c.width = w; c.height = h;
+            const tmp = document.createElement('canvas'); tmp.width = sw; tmp.height = sh;
+            tmp.getContext('2d').putImageData(src, 0, 0);
+            c.getContext('2d').drawImage(tmp, 0, 0);
+            return c.getContext('2d').getImageData(0, 0, w, h).data;
+        };
+
+        const rawA = normalise(imgA.imageData, imgA.width, imgA.height);
+        const rawB = normalise(imgB.imageData, imgB.width, imgB.height);
+
+        // Slice to copy — keeps original ImageData intact after transfer
+        const bufA = rawA.buffer.slice(0);
+        const bufB = rawB.buffer.slice(0);
+
+        const id = diffIdCounter++;
+        pendingDiffs.set(id, ({ diffOut, ratio }) => {
+            const diffCanvas = document.createElement('canvas');
+            diffCanvas.width = w; diffCanvas.height = h;
+            diffCanvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(diffOut), w, h), 0, 0);
+            resolve({ ratio, diffCanvas });
+        });
+
+        diffWorker.postMessage(
+            { type: 'visual-diff', id, dataA: new Uint8ClampedArray(bufA), dataB: new Uint8ClampedArray(bufB), w, h, threshold },
+            [bufA, bufB]
+        );
+    });
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
 const S = {
     pdfA: null, pdfB: null,
     fileA: null, fileB: null,
@@ -24,7 +74,7 @@ const $ = id => document.getElementById(id);
 const fmtBytes = b => b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
 const RENDER_SCALE = 1.5;
 
-// ── Upload UI ────────────────────────────────────────────────────────────────
+// ── Upload UI ─────────────────────────────────────────────────────────────────
 function setupUpload(dropZoneId, inputId, cardId, nameId, sizeId, removeId, errorId, which) {
     const zone = $(dropZoneId), input = $(inputId), card = $(cardId);
     const nameEl = $(nameId), sizeEl = $(sizeId), removeBtn = $(removeId), errorEl = $(errorId);
@@ -64,13 +114,13 @@ setupUpload('modified-drop-zone','modified-file-input','modified-file-card','mod
 
 function updateCompareBtn() { $('cmp-compare-btn').disabled = !(S.fileA && S.fileB); }
 
-// ── Options ──────────────────────────────────────────────────────────────────
-$('cmp-threshold-slider').addEventListener('input', function() {
+// ── Options ───────────────────────────────────────────────────────────────────
+$('cmp-threshold-slider').addEventListener('input', function () {
     S.threshold = parseFloat(this.value);
     $('cmp-threshold-label').textContent = Math.round(S.threshold * 100) + '%';
 });
 
-$('cmp-ocr-toggle').addEventListener('change', function() {
+$('cmp-ocr-toggle').addEventListener('change', function () {
     S.ocrEnabled = this.checked;
     $('cmp-ocr-warning').classList.toggle('d-none', !S.ocrEnabled);
     if (S.ocrEnabled && !S.TesseractLib) {
@@ -81,7 +131,7 @@ $('cmp-ocr-toggle').addEventListener('change', function() {
     }
 });
 
-// ── Progress ─────────────────────────────────────────────────────────────────
+// ── Progress ──────────────────────────────────────────────────────────────────
 function setProgress(pct, msg, detail) {
     $('cmp-progress-bar').style.width = pct + '%';
     $('cmp-progress-message').textContent = msg;
@@ -113,32 +163,6 @@ async function extractText(pdfDoc, pageNum) {
     const page = await pdfDoc.getPage(pageNum);
     const tc = await page.getTextContent();
     return tc.items.map(i => i.str).join(' ');
-}
-
-// ── Visual diff ───────────────────────────────────────────────────────────────
-function visualDiff(imgA, imgB) {
-    const w = Math.max(imgA.width, imgB.width);
-    const h = Math.max(imgA.height, imgB.height);
-
-    const normalise = (src, sw, sh) => {
-        if (sw === w && sh === h) return src;
-        const c = document.createElement('canvas'); c.width = w; c.height = h;
-        const tmp = document.createElement('canvas'); tmp.width = sw; tmp.height = sh;
-        tmp.getContext('2d').putImageData(src, 0, 0);
-        c.getContext('2d').drawImage(tmp, 0, 0);
-        return c.getContext('2d').getImageData(0, 0, w, h);
-    };
-
-    const a = normalise(imgA.imageData, imgA.width, imgA.height);
-    const b = normalise(imgB.imageData, imgB.width, imgB.height);
-    const diffData = new Uint8ClampedArray(w * h * 4);
-    const changed = pixelmatch(a.data, b.data, diffData, w, h, {
-        threshold: S.threshold, includeAA: false, diffColor: [229, 50, 45], alpha: 0.3,
-    });
-    const diffCanvas = document.createElement('canvas');
-    diffCanvas.width = w; diffCanvas.height = h;
-    diffCanvas.getContext('2d').putImageData(new ImageData(diffData, w, h), 0, 0);
-    return { ratio: changed / (w * h), diffCanvas };
 }
 
 // ── Text diff ─────────────────────────────────────────────────────────────────
@@ -180,7 +204,7 @@ async function runComparison() {
 
         for (let i = 1; i <= S.totalPages; i++) {
             if (S.cancelled) break;
-            setProgress(Math.round(i / S.totalPages * 90), 'Analysing page ' + i + ' of ' + S.totalPages + '…');
+            setProgress(Math.round(i / S.totalPages * 90), `Analysing page ${i} of ${S.totalPages}…`);
 
             const hasA = i <= nA, hasB = i <= nB;
             const imgA = hasA ? await renderPageToData(S.pdfA, i) : null;
@@ -190,10 +214,14 @@ async function runComparison() {
             const { html: diffHtml, added: addedWords, removed: removedWords } = buildTextDiff(textA, textB);
 
             let status = 'unchanged', diffRatio = 0, diffCanvas = null;
-            if (!hasA) { status = 'added'; }
-            else if (!hasB) { status = 'removed'; }
-            else {
-                const vd = visualDiff(imgA, imgB);
+
+            if (!hasA) {
+                status = 'added';
+            } else if (!hasB) {
+                status = 'removed';
+            } else {
+                // ← visual diff runs off the main thread via Web Worker
+                const vd = await runVisualDiff(imgA, imgB, S.threshold);
                 diffRatio = vd.ratio; diffCanvas = vd.diffCanvas;
                 if (diffRatio > 0.001 || addedWords > 0 || removedWords > 0) status = 'changed';
             }
@@ -229,7 +257,7 @@ function renderResults() {
 
 // ── Sidebar stats ─────────────────────────────────────────────────────────────
 function updateSidebarStats() {
-    const total = S.results.length;
+    const total     = S.results.length;
     const changed   = S.results.filter(r => r.status === 'changed').length;
     const unchanged = S.results.filter(r => r.status === 'unchanged').length;
     const added     = S.results.filter(r => r.status === 'added').length;
@@ -513,7 +541,7 @@ $('cmp-overlay-next').addEventListener('click', () => { if (S.overlayPage < S.to
 
 // ── Report panel ──────────────────────────────────────────────────────────────
 function renderReport() {
-    const total = S.results.length;
+    const total     = S.results.length;
     const changed   = S.results.filter(r => r.status === 'changed').length;
     const unchanged = S.results.filter(r => r.status === 'unchanged').length;
     const other     = S.results.filter(r => r.status === 'added' || r.status === 'removed').length;
@@ -561,7 +589,7 @@ function activateTab(name) {
 document.querySelectorAll('.cmp-tab-btn').forEach(btn => btn.addEventListener('click', () => activateTab(btn.dataset.cmpTab)));
 
 // ── Panel divider drag-resize ─────────────────────────────────────────────────
-(function() {
+(function () {
     const divider = $('cmp-panel-divider');
     let dragging = false, startX = 0, startW = 0;
     divider.addEventListener('mousedown', e => {
