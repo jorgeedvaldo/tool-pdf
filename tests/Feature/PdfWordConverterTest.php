@@ -43,10 +43,9 @@ class PdfWordConverterTest extends TestCase
     {
         $response = $this->get('/en/tool/pdf-to-word');
 
-        // pdf.js for text extraction
+        // pdf.js for text extraction (from cdnjs)
         $response->assertSee('pdf.min.js', false);
-        // docx.js UMD for Word document generation
-        $response->assertSee('docx@6.5.0', false);
+        // No docx library — PDF→RTF is generated with pure JS
         // The converter script itself
         $response->assertSee('convert-pdf-word.js', false);
     }
@@ -55,10 +54,11 @@ class PdfWordConverterTest extends TestCase
     {
         $response = $this->get('/en/tool/word-to-pdf');
 
-        // mammoth for .docx parsing
+        // mammoth for .docx parsing (from cdnjs)
         $response->assertSee('mammoth', false);
-        // html2pdf for rendering to PDF
-        $response->assertSee('html2pdf', false);
+        // html2canvas + jsPDF instead of html2pdf wrapper
+        $response->assertSee('html2canvas', false);
+        $response->assertSee('jspdf', false);
         // The converter script itself
         $response->assertSee('convert-pdf-word.js', false);
     }
