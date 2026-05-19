@@ -8,4 +8,21 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    worker: {
+        format: 'es',
+    },
+    optimizeDeps: {
+        exclude: ['pdfjs-dist'],
+    },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    if (id.includes('pdfjs-dist')) return 'pdfjs';
+                    if (id.includes('tesseract.js')) return 'tesseract';
+                    if (id.includes('pixelmatch') || id.includes('diff') || id.includes('pdf-lib')) return 'compare-pdf-libs';
+                },
+            },
+        },
+    },
 });
