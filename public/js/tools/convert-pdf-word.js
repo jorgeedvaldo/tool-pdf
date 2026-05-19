@@ -200,6 +200,7 @@ async function convertPdfToWord(file) {
                 children.unshift(new Paragraph({
                     children: [new ImageRun({
                         data: buf,
+                        type: 'png',
                         transformation: { width: 580, height: Math.round(580 * imgVp.height / imgVp.width) },
                     })],
                     spacing: { after: 200 },
@@ -254,16 +255,21 @@ async function convertWordToPdf(file) {
     setProgress(45, 'A montar página…');
 
     // Build a printable container styled like an A4 document.
-    // Position off-screen to the right (NOT with opacity:0 — that would make
-    // html2canvas capture transparent pixels and produce a blank PDF).
+    // Wrap it in a zero-height overflow:hidden parent so it's invisible to the
+    // user but still fully laid-out in the DOM (html2canvas needs computed
+    // dimensions — opacity:0 or extreme negative offsets produce blank renders).
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:fixed;top:0;left:0;width:794px;height:0;overflow:hidden;z-index:-1;pointer-events:none;';
+    document.body.appendChild(wrapper);
+
     const container = document.createElement('div');
     container.id = 'cw-render-target';
     container.style.cssText = `
         width: 794px; padding: 48px 56px; background: #ffffff; color: #111;
         font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5;
-        box-sizing: border-box; position: fixed; top: 0; left: 100vw;
-        pointer-events: none; z-index: -1;
+        box-sizing: border-box;
     `;
+    wrapper.appendChild(container);
     container.innerHTML = `
         <style>
             #cw-render-target h1 { font-size: 24pt; margin: 0 0 12pt; font-weight: 700; }
@@ -308,7 +314,7 @@ async function convertWordToPdf(file) {
         await html2pdf().set(opts).from(container).save();
         setProgress(100, 'Pronto.');
     } finally {
-        container.remove();
+        wrapper.remove();
     }
     setTimeout(() => $('cw-progress').classList.add('d-none'), 1500);
 }
