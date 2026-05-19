@@ -17,6 +17,7 @@ return [
     'cat_security' => '安全',
     'cat_manage' => '页面管理',
     'cat_advanced' => '高级工具',
+    'cat_compare' => '比较',
     'cat_optimize' => '优化和保护',
     'cat_create' => '创建',
 
@@ -83,6 +84,9 @@ return [
     
     'compare_pdfs' => '比较PDF',
     'compare_pdfs_desc' => '检查文档之间的差异。',
+
+    'compare_pdf' => '比较 PDF',
+    'compare_pdf_desc' => '在两个 PDF 文档之间查找视觉和文本差异。',
     
     'optimize_web' => '网页优化',
     'optimize_web_desc' => '改善PDF的在线加载速度。',
