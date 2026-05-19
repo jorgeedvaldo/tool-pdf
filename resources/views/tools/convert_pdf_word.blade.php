@@ -69,13 +69,13 @@
                 </h1>
                 <p class="mb-3" style="opacity:.9;font-size:1rem">
                     {{ $mode === 'pdf-to-word'
-                        ? 'Convert PDF documents to editable RTF files (opens in Word, LibreOffice) directly in your browser.'
-                        : 'Convert Word (.docx) documents to clean PDF files directly in your browser.' }}
+                        ? 'Convert PDF documents to editable Word (.docx) files — text, tables, and images preserved.'
+                        : 'Convert Word documents (.docx, .doc, .odt, .rtf) to PDF — fonts, layout, and images preserved.' }}
                 </p>
                 <div class="d-flex flex-wrap gap-1">
-                    <span class="badge">🔒 100% Local</span>
-                    <span class="badge">☁️ No Upload</span>
-                    <span class="badge">⚡ Browser-based</span>
+                    <span class="badge">⚡ High Fidelity</span>
+                    <span class="badge">🖨️ LibreOffice Engine</span>
+                    <span class="badge">🗑️ Auto-deleted after conversion</span>
                 </div>
             </div>
             <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
@@ -118,12 +118,9 @@
                     <button type="button" class="btn btn-sm btn-outline-danger rounded-circle px-2" id="cw-pw-remove" title="Remove"><i class="bi bi-x-lg"></i></button>
                 </div>
 
-                <div class="form-check form-switch mt-3">
-                    <input class="form-check-input" type="checkbox" id="cw-include-images">
-                    <label class="form-check-label small" for="cw-include-images">
-                        Also embed each page as image at top of section (preserves visual layout, larger file)
-                    </label>
-                </div>
+                <p class="text-muted small mt-3 mb-0">
+                    <i class="bi bi-cpu me-1"></i>Conversion runs on the server using LibreOffice — preserves text, tables, images, and fonts.
+                </p>
             </div>
 
             {{-- Word → PDF pane --}}
@@ -131,8 +128,8 @@
                 <div id="cw-wp-zone" class="cw-drop">
                     <div class="cw-drop-icon"><i class="bi bi-cloud-upload"></i></div>
                     <h5 class="fw-bold mb-1">Select or drop a Word (.docx) file</h5>
-                    <p class="text-muted mb-0 small">Older .doc format not supported — save as .docx first.</p>
-                    <input type="file" id="cw-wp-input" class="d-none" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+                    <p class="text-muted mb-0 small">Supports .docx, .doc, .odt and .rtf formats.</p>
+                    <input type="file" id="cw-wp-input" class="d-none" accept=".docx,.doc,.odt,.rtf">
                 </div>
                 <div id="cw-wp-card" class="cw-file-card mt-3 d-none">
                     <div class="d-flex align-items-center gap-3">
@@ -167,7 +164,7 @@
 
             <p class="text-center mt-3 small text-muted">
                 <i class="bi bi-shield-lock-fill text-success me-1"></i>
-                Your files never leave your device. All conversion happens in your browser.
+                Files are processed on our server and automatically deleted immediately after conversion.
             </p>
         </div>
     </div>
@@ -227,15 +224,14 @@
 </div>
 
 @push('scripts')
-{{-- pdf.js: extract text from PDF pages --}}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
-{{-- mammoth: parse .docx → HTML (Word→PDF direction) --}}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-{{-- html2canvas + jsPDF: render HTML → PDF (Word→PDF direction) --}}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>window.CW_INITIAL_MODE = @json($mode);</script>
+<script>
+window.CW_INITIAL_MODE = @json($mode);
+window.CW_ROUTES = {
+    pdfToWord: '{{ route('convert.pdf_to_word') }}',
+    wordToPdf: '{{ route('convert.word_to_pdf') }}',
+    csrfToken: '{{ csrf_token() }}',
+};
+</script>
 <script src="{{ asset('js/tools/convert-pdf-word.js') }}"></script>
 @endpush
 
