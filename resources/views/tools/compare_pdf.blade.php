@@ -194,7 +194,7 @@
 </style>
 
 {{-- ══════════════ HERO ══════════════ --}}
-<section class="cmp-hero">
+<section class="cmp-hero" id="cmp-hero">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-8">
