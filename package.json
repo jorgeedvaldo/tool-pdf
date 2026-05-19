@@ -10,12 +10,5 @@
         "lodash": "^4.17.19",
         "postcss": "^8.1.14",
         "vite": "^4.0.0"
-    },
-    "dependencies": {
-        "diff": "^5.2.0",
-        "pdf-lib": "^1.17.1",
-        "pdfjs-dist": "^4.4.168",
-        "pixelmatch": "^6.0.0",
-        "tesseract.js": "^5.1.1"
     }
 }
