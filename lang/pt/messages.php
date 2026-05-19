@@ -45,7 +45,13 @@ return [
     
     'pdf_to_images' => 'PDF para Imagens',
     'pdf_to_images_desc' => 'Converter páginas em imagens.',
-    
+
+    'pdf_to_word' => 'PDF para Word',
+    'pdf_to_word_desc' => 'Converta documentos PDF em arquivos Word editáveis.',
+
+    'word_to_pdf' => 'Word para PDF',
+    'word_to_pdf_desc' => 'Converta documentos Word para formato PDF.',
+
     'web_to_pdf' => 'Página Web para PDF',
     'web_to_pdf_desc' => 'Salvar um site como PDF.',
     

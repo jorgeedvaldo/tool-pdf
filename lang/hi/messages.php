@@ -45,7 +45,13 @@ return [
     
     'pdf_to_images' => 'PDF को छवियों में बदलें',
     'pdf_to_images_desc' => 'PDF पृष्ठों को छवियों में बदलें।',
-    
+
+    'pdf_to_word' => 'PDF को Word में बदलें',
+    'pdf_to_word_desc' => 'PDF दस्तावेज़ों को संपादन योग्य Word फ़ाइलों में बदलें।',
+
+    'word_to_pdf' => 'Word को PDF में बदलें',
+    'word_to_pdf_desc' => 'Word दस्तावेज़ों को PDF प्रारूप में बदलें।',
+
     'web_to_pdf' => 'वेबपेज को PDF में बदलें',
     'web_to_pdf_desc' => 'किसी वेबसाइट को PDF के रूप में सहेजें।',
     

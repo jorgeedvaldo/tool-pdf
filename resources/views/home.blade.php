@@ -30,6 +30,8 @@
             'tools' => [
                 ['id' => 'images_to_pdf', 'icon' => 'bi-images', 'color' => 'yellow'],
                 ['id' => 'pdf_to_images', 'icon' => 'bi-file-earmark-image', 'color' => 'yellow'],
+                ['id' => 'pdf_to_word', 'icon' => 'bi-file-earmark-word', 'color' => 'blue'],
+                ['id' => 'word_to_pdf', 'icon' => 'bi-file-earmark-pdf', 'color' => 'red'],
             ]
         ],
         [
