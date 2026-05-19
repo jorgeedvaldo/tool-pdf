@@ -156,3 +156,7 @@ Route::get('/jobs/{slug}', [\App\Http\Controllers\JobController::class, 'show'])
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index']);
 Route::get('/sitemap/{lang}.xml', [\App\Http\Controllers\SitemapController::class, 'show'])->where('lang', '[a-zA-Z]{2}');
 Route::get('/feed', [\App\Http\Controllers\FeedController::class, 'index']);
+
+// Server-side conversion endpoints (LibreOffice)
+Route::post('/convert/pdf-to-word', [\App\Http\Controllers\ConvertController::class, 'pdfToWord'])->name('convert.pdf_to_word');
+Route::post('/convert/word-to-pdf', [\App\Http\Controllers\ConvertController::class, 'wordToPdf'])->name('convert.word_to_pdf');
