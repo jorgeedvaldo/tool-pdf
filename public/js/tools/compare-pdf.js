@@ -367,10 +367,10 @@ function renderContinuousViewer() {
         const bL = makePageBlock(r.i), bR = makePageBlock(r.i);
         left.appendChild(bL); right.appendChild(bR);
 
-        if (r.imgA) drawPageBlock(bL, r.imgA, r.diffCanvas, r.hlA, 'rgba(220,60,60,0.32)');
+        if (r.imgA) drawPageBlock(bL, r.imgA, r.diffCanvas, r.hlA, 'rgba(239,68,68,0.50)');
         else bL.appendChild(makePlaceholder('No page'));
 
-        if (r.imgB) drawPageBlock(bR, r.imgB, null, r.hlB, 'rgba(34,197,94,0.32)');
+        if (r.imgB) drawPageBlock(bR, r.imgB, null, r.hlB, 'rgba(34,197,94,0.50)');
         else bR.appendChild(makePlaceholder('No page'));
     });
 
@@ -399,7 +399,16 @@ function drawPageBlock(block, imgData, diffCanvas, textHighlights, hlColor) {
     canvas.getContext('2d').putImageData(imgData.imageData, 0, 0);
     block.appendChild(canvas);
 
-    // Text highlight overlay (green/red rectangles on changed words)
+    // Pixelmatch overlay (red diff pixels) — drawn first so text highlights appear on top
+    if (S.showDiffOverlay && diffCanvas) {
+        const ov = document.createElement('canvas');
+        ov.className = 'cmp-diff-overlay';
+        ov.width = diffCanvas.width; ov.height = diffCanvas.height;
+        ov.getContext('2d').drawImage(diffCanvas, 0, 0);
+        block.appendChild(ov);
+    }
+
+    // Text highlight overlay (green/red rectangles on changed words) — drawn last, on top
     if (S.showTextHighlights && textHighlights && textHighlights.length > 0) {
         const hlCanvas = document.createElement('canvas');
         hlCanvas.width = imgData.width; hlCanvas.height = imgData.height;
@@ -410,15 +419,6 @@ function drawPageBlock(block, imgData, diffCanvas, textHighlights, hlColor) {
             ctx.fillRect(hl.x, hl.y, hl.w, hl.h);
         }
         block.appendChild(hlCanvas);
-    }
-
-    // Pixelmatch overlay (red diff pixels)
-    if (S.showDiffOverlay && diffCanvas) {
-        const ov = document.createElement('canvas');
-        ov.className = 'cmp-diff-overlay';
-        ov.width = diffCanvas.width; ov.height = diffCanvas.height;
-        ov.getContext('2d').drawImage(diffCanvas, 0, 0);
-        block.appendChild(ov);
     }
 }
 
