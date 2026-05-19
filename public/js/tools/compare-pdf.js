@@ -212,19 +212,24 @@ function buildTextDiff(textA, textB) {
 // Map diff words → text item positions for green/red highlights
 function computeTextHighlights(textA, itemsA, textB, itemsB) {
     const parts = diffWords(textA, textB);
+    const setA = new Set(), setB = new Set();
     const hlA = [], hlB = [];
     let posA = 0, posB = 0;
 
     for (const part of parts) {
         const len = part.value.length;
         if (part.removed) {
-            itemsA.forEach(it => {
-                if (it.endChar > posA && it.startChar < posA + len) hlA.push(it);
+            itemsA.forEach((it, idx) => {
+                if (it.endChar > posA && it.startChar < posA + len && !setA.has(idx)) {
+                    setA.add(idx); hlA.push(it);
+                }
             });
             posA += len;
         } else if (part.added) {
-            itemsB.forEach(it => {
-                if (it.endChar > posB && it.startChar < posB + len) hlB.push(it);
+            itemsB.forEach((it, idx) => {
+                if (it.endChar > posB && it.startChar < posB + len && !setB.has(idx)) {
+                    setB.add(idx); hlB.push(it);
+                }
             });
             posB += len;
         } else {
