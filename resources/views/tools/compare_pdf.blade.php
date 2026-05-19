@@ -587,5 +587,10 @@
     </div>
 </div>
 
-@vite(['resources/css/app.css', 'resources/js/app.js'])
+@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';</script>
+<script type="module" src="{{ asset('js/tools/compare-pdf.js') }}"></script>
+@endpush
+
 @endsection
