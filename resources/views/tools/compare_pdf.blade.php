@@ -340,6 +340,14 @@
             </label>
         </div>
 
+        {{-- Text highlights --}}
+        <div class="form-check form-switch mb-0 d-flex align-items-center gap-1">
+            <input class="form-check-input mt-0" type="checkbox" id="cmp-show-text-hl" checked>
+            <label class="form-check-label" for="cmp-show-text-hl" style="cursor:pointer;font-size:.82rem;font-weight:600">
+                <i class="bi bi-fonts me-1"></i>Text marks
+            </label>
+        </div>
+
         {{-- Changed only --}}
         <div class="form-check form-switch mb-0 d-flex align-items-center gap-1">
             <input class="form-check-input mt-0" type="checkbox" id="cmp-changed-only">
