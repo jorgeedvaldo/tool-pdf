@@ -162,6 +162,8 @@
                         <li><h6 class="dropdown-header text-primary fw-bold">{{ __('messages.cat_convert') }}</h6></li>
                         <li><a class="dropdown-item" href="{{ route('tool.images_to_pdf') }}"><i class="bi bi-images me-2 text-warning"></i>{{ __('messages.images_to_pdf') }}</a></li>
                         <li><a class="dropdown-item" href="{{ route('tool.pdf_to_images') }}"><i class="bi bi-file-earmark-image me-2 text-warning"></i>{{ __('messages.pdf_to_images') }}</a></li>
+                        <li><a class="dropdown-item" href="{{ route('tool.pdf_to_word') }}"><i class="bi bi-file-earmark-word me-2 text-primary"></i>PDF to Word</a></li>
+                        <li><a class="dropdown-item" href="{{ route('tool.word_to_pdf') }}"><i class="bi bi-file-earmark-pdf me-2 text-danger"></i>Word to PDF</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item fw-bold text-center bg-light py-2" href="{{ route('home') }}#tools-section">{{ __('messages.tools') }}...</a></li>
                     </ul>

@@ -119,6 +119,14 @@ Route::group([
         return view('tools.compare_pdf');
     })->name('tool.compare_pdf');
 
+    Route::get('/tool/pdf-to-word', function () {
+        return view('tools.convert_pdf_word', ['mode' => 'pdf-to-word']);
+    })->name('tool.pdf_to_word');
+
+    Route::get('/tool/word-to-pdf', function () {
+        return view('tools.convert_pdf_word', ['mode' => 'word-to-pdf']);
+    })->name('tool.word_to_pdf');
+
     // Info Pages
     Route::get('/about', function () {
         return view('pages.about');
