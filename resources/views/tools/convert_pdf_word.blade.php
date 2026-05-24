@@ -74,8 +74,9 @@
                 </p>
                 <div class="d-flex flex-wrap gap-1">
                     <span class="badge">⚡ High Fidelity</span>
-                    <span class="badge">🖨️ LibreOffice Engine</span>
+                    <span class="badge">🔧 PHPOffice + mPDF Engine</span>
                     <span class="badge">🗑️ Auto-deleted after conversion</span>
+                    <span class="badge">📊 Tables &amp; Lists Detected</span>
                 </div>
             </div>
             <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
