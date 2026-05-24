@@ -9,6 +9,42 @@
     </div>
 </div>
 
+{{-- Workflow Editor Feature Banner --}}
+<div class="container mb-5">
+    <div class="row align-items-center p-4 rounded-4 shadow-sm" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color:#fff;">
+        <div class="col-lg-7">
+            <span class="badge mb-2" style="background:rgba(229,50,45,.85);font-size:.75rem;padding:.35em .75em;border-radius:20px">✨ New Feature</span>
+            <h2 class="fw-bold mb-2" style="font-size:1.6rem">Visual Workflow Editor <span style="font-size:0.8rem;background:rgba(255,255,255,.15);padding:.2em .6em;border-radius:12px;vertical-align:middle;margin-left:6px">Beta</span></h2>
+            <p class="mb-3" style="opacity:.85;font-size:.95rem">Chain multiple PDF operations together visually — drag-and-drop tools onto a canvas, connect them, and execute the entire pipeline in one click.</p>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <span style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);font-size:.75rem;padding:.3em .7em;border-radius:16px">🔗 Node-based editor</span>
+                <span style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);font-size:.75rem;padding:.3em .7em;border-radius:16px">📋 Pre-built templates</span>
+                <span style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);font-size:.75rem;padding:.3em .7em;border-radius:16px">💾 Save &amp; load workflows</span>
+                <span style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);font-size:.75rem;padding:.3em .7em;border-radius:16px">⚡ One-click execute</span>
+            </div>
+            <a href="{{ Route::has('tool.workflow_editor') ? route('tool.workflow_editor') : '#' }}" class="btn fw-bold px-4 py-2 rounded-pill" style="background:#E5322D;color:#fff;border:none;box-shadow:0 4px 14px rgba(229,50,45,.4)">
+                <i class="bi bi-diagram-3 me-2"></i>Open Workflow Editor
+            </a>
+        </div>
+        <div class="col-lg-5 text-center mt-4 mt-lg-0 d-none d-lg-block">
+            <div style="background:rgba(255,255,255,.07);border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,.1)">
+                <div class="d-flex align-items-center gap-2 mb-2" style="font-size:.75rem;color:rgba(255,255,255,.6)">
+                    <span style="width:10px;height:10px;background:#ff5f57;border-radius:50%"></span>
+                    <span style="width:10px;height:10px;background:#febc2e;border-radius:50%"></span>
+                    <span style="width:10px;height:10px;background:#28c840;border-radius:50%"></span>
+                    <span class="ms-1">workflow.json</span>
+                </div>
+                <div class="d-flex align-items-center justify-content-center gap-1" style="font-size:.78rem">
+                    @foreach(['📥 Input', '⚙️ Compress', '🔲 Grayscale', '🔒 Protect', '📤 Output'] as $node)
+                        <span style="background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:.3em .55em;white-space:nowrap">{{ $node }}</span>
+                        @if(!$loop->last)<span style="color:rgba(255,255,255,.4)">→</span>@endif
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container" id="tools-section">
     <!-- Categories Array definition -->
     @php
@@ -22,21 +58,6 @@
                 ['id' => 'compress_pdf', 'icon' => 'bi-arrows-angle-contract', 'color' => 'green'],
                 ['id' => 'edit_pdf', 'icon' => 'bi-pencil-square', 'color' => 'purple'],
                 ['id' => 'sign_pdf', 'icon' => 'bi-pen', 'color' => 'cyan'],
-            ]
-        ],
-        [
-            'name' => __('messages.cat_convert'),
-            'icon' => 'bi-arrow-left-right',
-            'tools' => [
-                ['id' => 'images_to_pdf',  'icon' => 'bi-images',                  'color' => 'yellow'],
-                ['id' => 'pdf_to_images',  'icon' => 'bi-file-earmark-image',       'color' => 'yellow'],
-                ['id' => 'pdf_to_word',    'icon' => 'bi-file-earmark-word',        'color' => 'blue'],
-                ['id' => 'word_to_pdf',    'icon' => 'bi-file-earmark-pdf',         'color' => 'red'],
-                ['id' => 'pdf_to_excel',   'icon' => 'bi-file-earmark-spreadsheet', 'color' => 'green'],
-                ['id' => 'excel_to_pdf',   'icon' => 'bi-file-earmark-spreadsheet', 'color' => 'green'],
-                ['id' => 'pdf_to_ppt',     'icon' => 'bi-file-earmark-slides',      'color' => 'orange'],
-                ['id' => 'ppt_to_pdf',     'icon' => 'bi-file-earmark-slides',      'color' => 'orange'],
-                ['id' => 'html_to_pdf',    'icon' => 'bi-globe',                    'color' => 'blue'],
             ]
         ],
         [
@@ -55,18 +76,40 @@
                 ['id' => 'remove_pages',     'icon' => 'bi-file-earmark-minus', 'color' => 'red'],
                 ['id' => 'extract_pages',    'icon' => 'bi-file-earmark-break', 'color' => 'blue'],
                 ['id' => 'reorganize_pages', 'icon' => 'bi-shuffle',            'color' => 'purple'],
+                ['id' => 'reverse_pages',    'icon' => 'bi-arrow-left-right',   'color' => 'red'],
+                ['id' => 'n_up_pdf',         'icon' => 'bi-grid',               'color' => 'purple'],
                 ['id' => 'flatten_pdf',      'icon' => 'bi-layers',             'color' => 'orange'],
                 ['id' => 'repair_pdf',       'icon' => 'bi-wrench',             'color' => 'teal'],
+            ]
+        ],
+        [
+            'name' => __('messages.cat_convert'),
+            'icon' => 'bi-arrow-left-right',
+            'tools' => [
+                ['id' => 'images_to_pdf',    'icon' => 'bi-images',                  'color' => 'yellow'],
+                ['id' => 'pdf_to_images',    'icon' => 'bi-file-earmark-image',       'color' => 'yellow'],
+                ['id' => 'pdf_to_word',      'icon' => 'bi-file-earmark-word',        'color' => 'blue'],
+                ['id' => 'word_to_pdf',      'icon' => 'bi-file-earmark-pdf',         'color' => 'red'],
+                ['id' => 'pdf_to_excel',     'icon' => 'bi-file-earmark-spreadsheet', 'color' => 'green'],
+                ['id' => 'excel_to_pdf',     'icon' => 'bi-file-earmark-spreadsheet', 'color' => 'green'],
+                ['id' => 'pdf_to_ppt',       'icon' => 'bi-file-earmark-slides',      'color' => 'orange'],
+                ['id' => 'ppt_to_pdf',       'icon' => 'bi-file-earmark-slides',      'color' => 'orange'],
+                ['id' => 'html_to_pdf',      'icon' => 'bi-globe',                    'color' => 'blue'],
+                ['id' => 'pdf_to_grayscale', 'icon' => 'bi-circle-half',              'color' => 'gray'],
+                ['id' => 'txt_to_pdf',       'icon' => 'bi-file-text',                'color' => 'teal'],
+                ['id' => 'markdown_to_pdf',  'icon' => 'bi-markdown',                 'color' => 'blue'],
+                ['id' => 'extract_images',   'icon' => 'bi-file-earmark-image',       'color' => 'orange'],
             ]
         ],
         [
             'name' => __('messages.cat_advanced'),
             'icon' => 'bi-gear',
             'tools' => [
-                ['id' => 'ocr_pdf',          'icon' => 'bi-search',   'color' => 'cyan'],
-                ['id' => 'add_watermark',    'icon' => 'bi-droplet',  'color' => 'indigo'],
-                ['id' => 'add_page_numbers', 'icon' => 'bi-123',      'color' => 'gray'],
-                ['id' => 'overlay_pdfs',     'icon' => 'bi-layers',   'color' => 'teal'],
+                ['id' => 'ocr_pdf',           'icon' => 'bi-search',     'color' => 'cyan'],
+                ['id' => 'add_watermark',     'icon' => 'bi-droplet',    'color' => 'indigo'],
+                ['id' => 'add_page_numbers',  'icon' => 'bi-123',        'color' => 'gray'],
+                ['id' => 'add_header_footer', 'icon' => 'bi-layout-text-sidebar', 'color' => 'blue'],
+                ['id' => 'overlay_pdfs',      'icon' => 'bi-layers',     'color' => 'teal'],
             ]
         ],
         [
@@ -74,6 +117,13 @@
             'icon' => 'bi-file-diff',
             'tools' => [
                 ['id' => 'compare_pdf', 'icon' => 'bi-file-diff', 'color' => 'red'],
+            ]
+        ],
+        [
+            'name' => __('messages.cat_workflow'),
+            'icon' => 'bi-diagram-3',
+            'tools' => [
+                ['id' => 'workflow_editor', 'icon' => 'bi-diagram-3', 'color' => 'red'],
             ]
         ]
     ];
