@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use PhpOffice\PhpWord\IOFactory as WordIOFactory;
 use PhpOffice\PhpWord\Settings as WordSettings;
+use PhpOffice\PhpWord\Element\Section;
 use PhpOffice\PhpSpreadsheet\IOFactory as SpreadsheetIOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpPresentation\IOFactory as PresentationIOFactory;
@@ -20,6 +21,7 @@ class ConvertController extends Controller
     // ─────────────────────────────────────────────────────────────────────────
     //  PDF → Word (.docx)
     //  Uses smalot/pdfparser to extract text + phpoffice/phpword to write docx.
+    //  Applies structured text analysis: headings, lists, tables, paragraphs.
     // ─────────────────────────────────────────────────────────────────────────
     public function pdfToWord(Request $request)
     {
@@ -34,60 +36,44 @@ class ConvertController extends Controller
             $outputPath = $tmpDir . '/output.docx';
             $request->file('file')->move($tmpDir, 'input.pdf');
 
-            // Parse PDF
-            $parser  = new PdfParser();
-            $pdf     = $parser->parseFile($inputPath);
-            $pages   = $pdf->getPages();
+            $parser = new PdfParser();
+            $pdf    = $parser->parseFile($inputPath);
+            $pages  = $pdf->getPages();
 
-            // Build Word document
             $phpWord = new \PhpOffice\PhpWord\PhpWord();
-            $phpWord->getDefaultFontName('Times New Roman');
-            $phpWord->setDefaultFontSize(12);
+            $phpWord->setDefaultFontName('Calibri');
+            $phpWord->setDefaultFontSize(11);
 
+            $twip = fn(float $cm) => \PhpOffice\PhpWord\Shared\Converter::cmToTwip($cm);
             $sectionStyle = [
-                'marginTop'    => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2.5),
-                'marginBottom' => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2.5),
-                'marginLeft'   => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2.5),
-                'marginRight'  => \PhpOffice\PhpWord\Shared\Converter::cmToTwip(2.5),
+                'marginTop'    => $twip(2.54),
+                'marginBottom' => $twip(2.54),
+                'marginLeft'   => $twip(2.54),
+                'marginRight'  => $twip(2.54),
             ];
 
+            $pageCount = count($pages);
             foreach ($pages as $i => $page) {
                 $section = $phpWord->addSection($sectionStyle);
-
                 $rawText = $page->getText();
-                if (!$rawText) continue;
 
-                // Split into paragraphs on blank lines or line breaks
-                $paragraphs = preg_split('/\n{2,}/', trim($rawText));
-
-                foreach ($paragraphs as $para) {
-                    $para = trim(preg_replace('/[ \t]+/', ' ', $para));
-                    if ($para === '') {
-                        $section->addTextBreak();
-                        continue;
-                    }
-                    // Detect heading heuristic: short line (<80 chars), all caps or ends without punctuation
-                    $isHeading = (mb_strlen($para) < 80 &&
-                        (mb_strtoupper($para) === $para || !preg_match('/[.,:;!?]$/', $para)));
-
-                    if ($isHeading && mb_strlen($para) < 60) {
-                        $section->addText($para, ['bold' => true, 'size' => 14]);
-                    } else {
-                        // Split into lines and add with spacing
-                        $lines = explode("\n", $para);
-                        $text  = implode(' ', array_map('trim', $lines));
-                        $section->addText($text, ['size' => 12], ['spaceAfter' => 120]);
-                    }
+                if (!trim($rawText)) {
+                    $section->addText(
+                        '(Page ' . ($i + 1) . ': no extractable text — may be a scanned image)',
+                        ['italic' => true, 'color' => '888888', 'size' => 10]
+                    );
+                    if ($i < $pageCount - 1) $section->addPageBreak();
+                    continue;
                 }
 
-                // Page break between pages (except last)
-                if ($i < count($pages) - 1) {
-                    $section->addPageBreak();
-                }
+                $blocks = $this->analyzeTextBlocks($rawText);
+                $this->renderBlocksToSection($section, $blocks, $phpWord);
+
+                if ($i < $pageCount - 1) $section->addPageBreak();
             }
 
             if (count($phpWord->getSections()) === 0) {
-                $phpWord->addSection($sectionStyle)->addText('(Documento sem texto extraível)');
+                $phpWord->addSection($sectionStyle)->addText('(No extractable text found in this PDF)');
             }
 
             $writer = WordIOFactory::createWriter($phpWord, 'Word2007');
@@ -120,18 +106,17 @@ class ConvertController extends Controller
         $ext  = strtolower($file->getClientOriginalExtension());
 
         if (!in_array($ext, ['docx', 'doc', 'odt', 'rtf'], true)) {
-            return response()->json(['error' => 'Formato não suportado. Use .docx, .doc, .odt ou .rtf.'], 422);
+            return response()->json(['error' => 'Unsupported format. Use .docx, .doc, .odt or .rtf.'], 422);
         }
 
         $tmpDir = $this->makeTmpDir();
 
         try {
-            $inputName = 'input.' . $ext;
-            $inputPath = $tmpDir . '/' . $inputName;
+            $inputName  = 'input.' . $ext;
+            $inputPath  = $tmpDir . '/' . $inputName;
             $outputPath = $tmpDir . '/output.pdf';
             $file->move($tmpDir, $inputName);
 
-            // Configure PhpWord to use mPDF as PDF renderer
             WordSettings::setPdfRendererName(WordSettings::PDF_RENDERER_MPDF);
             WordSettings::setPdfRendererPath(base_path('vendor/mpdf/mpdf'));
 
@@ -173,12 +158,17 @@ class ConvertController extends Controller
 
             $spreadsheet = SpreadsheetIOFactory::load($inputPath);
 
-            // Render each sheet as HTML, then convert via mPDF
             $writer = SpreadsheetIOFactory::createWriter($spreadsheet, 'Html');
             $writer->save($htmlPath);
 
-            $mpdf = new Mpdf(['format' => 'A4-L', 'margin_top' => 10, 'margin_bottom' => 10,
-                              'margin_left' => 8, 'margin_right' => 8]);
+            $mpdf = new Mpdf([
+                'format'        => 'A4-L',
+                'margin_top'    => 10,
+                'margin_bottom' => 10,
+                'margin_left'   => 8,
+                'margin_right'  => 8,
+                'default_font'  => 'dejavusans',
+            ]);
             $mpdf->simpleTables = true;
             $mpdf->WriteHTML(file_get_contents($htmlPath));
             $mpdf->Output($outputPath, 'F');
@@ -195,6 +185,7 @@ class ConvertController extends Controller
 
     // ─────────────────────────────────────────────────────────────────────────
     //  PDF → Excel
+    //  Detects column structure via consistent spacing patterns.
     // ─────────────────────────────────────────────────────────────────────────
     public function pdfToExcel(Request $request)
     {
@@ -213,16 +204,28 @@ class ConvertController extends Controller
 
             foreach ($pages as $i => $page) {
                 $sheet = $i === 0
-                    ? $spreadsheet->getActiveSheet()->setTitle('Page 1')
+                    ? $spreadsheet->getActiveSheet()->setTitle('Page ' . ($i + 1))
                     : $spreadsheet->createSheet()->setTitle('Page ' . ($i + 1));
 
                 $lines = array_filter(array_map('trim', explode("\n", $page->getText())));
                 $row   = 1;
                 foreach ($lines as $line) {
-                    // Split on 2+ spaces as a simple column separator heuristic
-                    $cells = preg_split('/\s{2,}/', $line);
+                    // Use tab or 2+ spaces as column separator
+                    $cells = preg_split('/\t|\s{2,}/', $line);
                     foreach ($cells as $col => $cell) {
-                        $sheet->setCellValue([$col + 1, $row], trim($cell));
+                        $cell = trim($cell);
+                        // Auto-detect numeric values for proper cell type
+                        if (is_numeric(str_replace([',', '.'], ['', '.'], $cell))) {
+                            $sheet->setCellValue([$col + 1, $row], (float) str_replace(',', '.', $cell));
+                        } else {
+                            $sheet->setCellValue([$col + 1, $row], $cell);
+                        }
+                    }
+                    // Auto-fit the header row
+                    if ($row === 1) {
+                        foreach ($cells as $col => $_) {
+                            $sheet->getColumnDimensionByColumn($col + 1)->setAutoSize(true);
+                        }
                     }
                     $row++;
                 }
@@ -244,6 +247,7 @@ class ConvertController extends Controller
 
     // ─────────────────────────────────────────────────────────────────────────
     //  PDF → PowerPoint (.pptx)
+    //  Detects title vs body text per page for better slide structure.
     // ─────────────────────────────────────────────────────────────────────────
     public function pdfToPpt(Request $request)
     {
@@ -259,34 +263,74 @@ class ConvertController extends Controller
             $pdf          = $parser->parseFile($inputPath);
             $pages        = $pdf->getPages();
             $presentation = new PhpPresentation();
-            $presentation->removeSlide(0); // remove default blank
+            $presentation->removeSlide(0);
 
             foreach ($pages as $i => $page) {
-                $slide = $presentation->createSlide();
-                $text  = trim($page->getText());
-                if (!$text) continue;
+                $rawText = trim($page->getText());
+                $slide   = $presentation->createSlide();
 
-                // Page label
-                $label = $slide->createRichTextShape();
-                $label->setWidth(680)->setHeight(36)->setOffsetX(30)->setOffsetY(16);
-                $run = $label->getActiveParagraph()->createTextRun('Page ' . ($i + 1));
-                $run->getFont()->setBold(true)->setSize(16)->setColor(
-                    new \PhpOffice\PhpPresentation\Style\Color('FF333333')
-                );
+                if (!$rawText) {
+                    $empty = $slide->createRichTextShape();
+                    $empty->setWidth(680)->setHeight(36)->setOffsetX(30)->setOffsetY(16);
+                    $empty->getActiveParagraph()->createTextRun('Page ' . ($i + 1))
+                          ->getFont()->setBold(true)->setSize(14)
+                          ->setColor(new \PhpOffice\PhpPresentation\Style\Color('FF333333'));
+                    continue;
+                }
 
-                // Body text
-                $body = $slide->createRichTextShape();
-                $body->setWidth(680)->setHeight(450)->setOffsetX(30)->setOffsetY(60);
+                $lines  = array_values(array_filter(array_map('trim', explode("\n", $rawText))));
+                $blocks = $this->analyzeTextBlocks($rawText);
 
+                // First heading-like block becomes the slide title
+                $titleText = null;
+                $bodyBlocks = [];
+                foreach ($blocks as $block) {
+                    if ($titleText === null && in_array($block['type'], ['h1', 'h2', 'h3'], true)) {
+                        $titleText = $block['text'];
+                    } else {
+                        $bodyBlocks[] = $block;
+                    }
+                }
+
+                // Fallback: use first non-empty line as title
+                if ($titleText === null && !empty($lines)) {
+                    $titleText  = array_shift($lines);
+                    $bodyBlocks = array_map(fn($l) => ['type' => 'paragraph', 'text' => $l], $lines);
+                }
+
+                // Title shape
+                $titleShape = $slide->createRichTextShape();
+                $titleShape->setWidth(680)->setHeight(52)->setOffsetX(30)->setOffsetY(16);
+                $run = $titleShape->getActiveParagraph()->createTextRun($titleText ?? ('Page ' . ($i + 1)));
+                $run->getFont()->setBold(true)->setSize(20)
+                    ->setColor(new \PhpOffice\PhpPresentation\Style\Color('FF1a1a2e'));
+
+                // Body shape
+                $body    = $slide->createRichTextShape();
+                $body->setWidth(680)->setHeight(430)->setOffsetX(30)->setOffsetY(80);
                 $isFirst = true;
-                foreach (preg_split('/\n{2,}/', $text) as $para) {
-                    $para = trim(preg_replace('/[ \t]+/', ' ', $para));
-                    if (!$para) continue;
+
+                foreach ($bodyBlocks as $block) {
+                    $text = $block['text'] ?? '';
+                    if (!trim($text)) continue;
                     if (!$isFirst) $body->createParagraph();
-                    $run = $body->getActiveParagraph()->createTextRun($para);
-                    $run->getFont()->setSize(12)->setColor(
-                        new \PhpOffice\PhpPresentation\Style\Color('FF111111')
-                    );
+
+                    $prefix = match ($block['type']) {
+                        'bullet'   => '• ',
+                        'numbered' => '',
+                        default    => '',
+                    };
+
+                    $run = $body->getActiveParagraph()->createTextRun($prefix . $text);
+                    $fontSize = match ($block['type']) {
+                        'h1'  => 16,
+                        'h2'  => 14,
+                        'h3'  => 12,
+                        default => 11,
+                    };
+                    $isBold = in_array($block['type'], ['h1', 'h2', 'h3'], true);
+                    $run->getFont()->setSize($fontSize)->setBold($isBold)
+                        ->setColor(new \PhpOffice\PhpPresentation\Style\Color('FF222222'));
                     $isFirst = false;
                 }
             }
@@ -321,7 +365,7 @@ class ConvertController extends Controller
         $file = $request->file('file');
         $ext  = strtolower($file->getClientOriginalExtension());
         if (!in_array($ext, ['pptx', 'ppt', 'odp'], true)) {
-            return response()->json(['error' => 'Unsupported format. Use .pptx or .odp.'], 422);
+            return response()->json(['error' => 'Unsupported format. Use .pptx, .ppt or .odp.'], 422);
         }
 
         $tmpDir = $this->makeTmpDir();
@@ -331,13 +375,19 @@ class ConvertController extends Controller
             $file->move($tmpDir, 'input.' . $ext);
 
             $presentation = PresentationIOFactory::load($inputPath);
-            $mpdf = new Mpdf(['format' => 'A4-L', 'margin_top' => 15, 'margin_bottom' => 15,
-                              'margin_left' => 15, 'margin_right' => 15]);
+            $mpdf = new Mpdf([
+                'format'        => 'A4-L',
+                'margin_top'    => 15,
+                'margin_bottom' => 15,
+                'margin_left'   => 15,
+                'margin_right'  => 15,
+                'default_font'  => 'dejavusans',
+            ]);
 
             for ($i = 0; $i < $presentation->getSlideCount(); $i++) {
                 $slide = $presentation->getSlide($i);
                 $html  = '<div style="font-family:Arial,sans-serif;padding:20px;">';
-                $html .= '<p style="color:#999;font-size:10pt;margin:0 0 10pt">Slide ' . ($i + 1) . '</p>';
+                $html .= '<p style="color:#999;font-size:9pt;margin:0 0 8pt;border-bottom:1px solid #eee;padding-bottom:4pt">Slide ' . ($i + 1) . '</p>';
 
                 foreach ($slide->getShapeCollection() as $shape) {
                     if (!($shape instanceof RichTextShape)) continue;
@@ -351,7 +401,8 @@ class ConvertController extends Controller
                         $font     = !empty($elements) ? $elements[0]->getFont() : null;
                         $size     = $font ? ($font->getSize() ?? 14) : 14;
                         $bold     = $font && $font->isBold() ? 'font-weight:bold;' : '';
-                        $html    .= "<p style=\"font-size:{$size}pt;{$bold}margin:4pt 0\">{$line}</p>";
+                        $color    = 'color:#111;';
+                        $html    .= "<p style=\"font-size:{$size}pt;{$bold}{$color}margin:4pt 0\">{$line}</p>";
                     }
                 }
                 $html .= '</div>';
@@ -378,7 +429,7 @@ class ConvertController extends Controller
         $request->validate(['url' => 'required|url|max:2048']);
         $url  = $request->input('url');
 
-        // Basic SSRF guard: block private/reserved IP ranges
+        // SSRF guard: block private/reserved IP ranges
         $host = parse_url($url, PHP_URL_HOST);
         if ($host) {
             $ip = gethostbyname($host);
@@ -395,10 +446,16 @@ class ConvertController extends Controller
             $response = $client->get($url, ['headers' => ['User-Agent' => 'ToolPDF/1.0 (+https://toolpdf.org)']]);
             $html     = (string) $response->getBody();
 
-            $mpdf = new Mpdf(['format' => 'A4', 'margin_top' => 12, 'margin_bottom' => 12,
-                              'margin_left' => 10, 'margin_right' => 10]);
+            $mpdf = new Mpdf([
+                'format'        => 'A4',
+                'margin_top'    => 12,
+                'margin_bottom' => 12,
+                'margin_left'   => 10,
+                'margin_right'  => 10,
+                'default_font'  => 'dejavusans',
+            ]);
             $mpdf->simpleTables = true;
-            $mpdf->setBasePath($url); // resolve relative image/CSS URLs
+            $mpdf->setBasePath($url);
             $mpdf->WriteHTML($html);
             $mpdf->Output($outputPath, 'F');
 
@@ -410,6 +467,224 @@ class ConvertController extends Controller
         } finally {
             $this->scheduleTmpCleanup($tmpDir);
         }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  Text analysis helpers (used by PDF→Word and PDF→PPT)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Analyse raw PDF text into typed blocks: h1/h2/h3, bullet, numbered, table, paragraph.
+     * Inspired by pdfcraft's structured document analysis approach.
+     */
+    private function analyzeTextBlocks(string $rawText): array
+    {
+        $lines  = explode("\n", $rawText);
+        $blocks = [];
+        $buffer = [];
+
+        $flush = function () use (&$buffer, &$blocks) {
+            if (empty($buffer)) return;
+            $text = trim(preg_replace('/\s+/', ' ', implode(' ', array_map('trim', $buffer))));
+            if ($text !== '') {
+                $blocks[] = ['type' => 'paragraph', 'text' => $text];
+            }
+            $buffer = [];
+        };
+
+        foreach ($lines as $line) {
+            $trimmed = trim($line);
+
+            if ($trimmed === '') {
+                $flush();
+                continue;
+            }
+
+            // Bullet points: •, ·, ▪, ▸, -, * followed by a space
+            if (preg_match('/^[•·▪▸\-\*]\s+(.+)$/u', $trimmed, $m)) {
+                $flush();
+                $blocks[] = ['type' => 'bullet', 'text' => trim($m[1])];
+                continue;
+            }
+
+            // Numbered lists: "1.", "1)", "(a)", "a.", "a)"
+            if (preg_match('/^(\d+[.)\]]|[a-z][.)]|\([a-z]\))\s+(.+)$/u', $trimmed, $m)) {
+                $flush();
+                $blocks[] = ['type' => 'numbered', 'text' => trim($m[2])];
+                continue;
+            }
+
+            // Table row heuristic: 2+ columns separated by 2+ spaces/tabs
+            $cols = preg_split('/\t|\s{2,}/', $trimmed);
+            if (count($cols) >= 2) {
+                $flush();
+                $blocks[] = ['type' => '_table_row', 'cols' => $cols];
+                continue;
+            }
+
+            // Heading heuristic: buffer is empty, line is short, no sentence-ending punctuation
+            $len       = mb_strlen($trimmed);
+            $noEndPunct = !preg_match('/[.,:;!?]$/', $trimmed);
+            $isAllCaps  = $trimmed === mb_strtoupper($trimmed, 'UTF-8') && preg_match('/\p{Lu}/u', $trimmed);
+
+            if (empty($buffer) && $noEndPunct && $len <= 90) {
+                $flush();
+                if ($isAllCaps && $len <= 60) {
+                    $blocks[] = ['type' => 'h1', 'text' => $trimmed];
+                } elseif ($len <= 50) {
+                    $blocks[] = ['type' => 'h2', 'text' => $trimmed];
+                } elseif ($len <= 75) {
+                    $blocks[] = ['type' => 'h3', 'text' => $trimmed];
+                } else {
+                    $buffer[] = $trimmed;
+                }
+                continue;
+            }
+
+            $buffer[] = $trimmed;
+        }
+
+        $flush();
+
+        return $this->mergeTableRows($blocks);
+    }
+
+    /**
+     * Merge consecutive _table_row blocks into a single table block.
+     * Isolated single rows fall back to paragraph.
+     */
+    private function mergeTableRows(array $blocks): array
+    {
+        $result   = [];
+        $rowBatch = [];
+
+        $flushRows = function () use (&$rowBatch, &$result) {
+            if (empty($rowBatch)) return;
+            if (count($rowBatch) >= 2) {
+                $result[] = ['type' => 'table', 'rows' => array_column($rowBatch, 'cols')];
+            } else {
+                foreach ($rowBatch as $r) {
+                    $result[] = ['type' => 'paragraph', 'text' => implode('  ', $r['cols'])];
+                }
+            }
+            $rowBatch = [];
+        };
+
+        foreach ($blocks as $block) {
+            if ($block['type'] === '_table_row') {
+                $rowBatch[] = $block;
+            } else {
+                $flushRows();
+                $result[] = $block;
+            }
+        }
+        $flushRows();
+
+        return $result;
+    }
+
+    /**
+     * Render typed blocks into a PhpWord Section.
+     */
+    private function renderBlocksToSection(Section $section, array $blocks, \PhpOffice\PhpWord\PhpWord $phpWord): void
+    {
+        static $tableStyleRegistered = false;
+        if (!$tableStyleRegistered) {
+            $phpWord->addTableStyle('ToolPDFTable', [
+                'borderSize'  => 4,
+                'borderColor' => 'cccccc',
+                'cellMargin'  => 80,
+            ], [
+                'bgColor' => 'f3f4f6',
+                'bold'    => true,
+            ]);
+            $tableStyleRegistered = true;
+        }
+
+        foreach ($blocks as $block) {
+            switch ($block['type']) {
+                case 'h1':
+                    $section->addText(
+                        $block['text'],
+                        ['bold' => true, 'size' => 18, 'name' => 'Calibri', 'color' => '1a1a2e'],
+                        ['spaceAfter' => 200, 'spaceBefore' => 160]
+                    );
+                    break;
+
+                case 'h2':
+                    $section->addText(
+                        $block['text'],
+                        ['bold' => true, 'size' => 14, 'name' => 'Calibri', 'color' => '1e3a5f'],
+                        ['spaceAfter' => 140, 'spaceBefore' => 100]
+                    );
+                    break;
+
+                case 'h3':
+                    $section->addText(
+                        $block['text'],
+                        ['bold' => true, 'size' => 12, 'name' => 'Calibri', 'color' => '2d5a87'],
+                        ['spaceAfter' => 100, 'spaceBefore' => 60]
+                    );
+                    break;
+
+                case 'bullet':
+                    $section->addText(
+                        '• ' . $block['text'],
+                        ['size' => 11, 'name' => 'Calibri'],
+                        ['spaceAfter' => 60, 'indent' => 360]
+                    );
+                    break;
+
+                case 'numbered':
+                    $section->addText(
+                        $block['text'],
+                        ['size' => 11, 'name' => 'Calibri'],
+                        ['spaceAfter' => 60, 'indent' => 360]
+                    );
+                    break;
+
+                case 'table':
+                    $this->addWordTable($section, $block['rows']);
+                    break;
+
+                default: // paragraph
+                    $section->addText(
+                        $block['text'],
+                        ['size' => 11, 'name' => 'Calibri'],
+                        ['spaceAfter' => 120, 'lineHeight' => 1.5]
+                    );
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Add a simple bordered table to a Word section.
+     * Splits available page width evenly across columns.
+     */
+    private function addWordTable(Section $section, array $rows): void
+    {
+        if (empty($rows)) return;
+
+        $maxCols   = max(array_map('count', $rows));
+        // A4 page with 2.54cm margins each side ≈ 9070 twips of usable width
+        $cellWidth = (int) floor(9070 / max($maxCols, 1));
+
+        $table = $section->addTable('ToolPDFTable');
+
+        foreach ($rows as $ri => $cols) {
+            $table->addRow();
+            while (count($cols) < $maxCols) $cols[] = '';
+            foreach ($cols as $ci => $cell) {
+                $cellEl    = $table->addCell($cellWidth, $ri === 0 ? ['bgColor' => 'f3f4f6'] : []);
+                $fontStyle = $ri === 0
+                    ? ['bold' => true, 'size' => 10, 'name' => 'Calibri']
+                    : ['size' => 10, 'name' => 'Calibri'];
+                $cellEl->addText(trim((string) $cell), $fontStyle);
+            }
+        }
+
+        $section->addTextBreak(1);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
