@@ -12,14 +12,15 @@ return [
     
     // Categories
     'cat_manipulate' => 'Manipulate PDFs',
-    'cat_convert' => 'Convert Files',
-    'cat_image' => 'Extract & Manipulate Images',
-    'cat_security' => 'Security',
-    'cat_manage' => 'Manage Pages',
-    'cat_advanced' => 'Advanced Tools',
-    'cat_compare' => 'Compare',
-    'cat_optimize' => 'Optimization & Protection',
-    'cat_create' => 'Creation',
+    'cat_convert'    => 'Convert Files',
+    'cat_image'      => 'Extract & Manipulate Images',
+    'cat_security'   => 'Security',
+    'cat_manage'     => 'Manage Pages',
+    'cat_advanced'   => 'Advanced Tools',
+    'cat_compare'    => 'Compare',
+    'cat_optimize'   => 'Optimization & Protection',
+    'cat_create'     => 'Creation',
+    'cat_workflow'   => 'Workflow Editor',
 
     // Tools
     'merge_pdf' => 'Merge PDF',
@@ -77,7 +78,29 @@ return [
     'web_to_pdf_desc' => 'Save a website as a PDF.',
     
     'extract_images' => 'Extract Images',
-    'extract_images_desc' => 'Get images contained in the document.',
+    'extract_images_desc' => 'Export each PDF page as PNG or JPEG images.',
+
+    // New tools
+    'workflow_editor'      => 'Workflow Editor',
+    'workflow_editor_desc' => 'Chain multiple PDF tools visually with drag-and-drop.',
+
+    'pdf_to_grayscale'     => 'PDF to Grayscale',
+    'pdf_to_grayscale_desc' => 'Convert a color PDF to black & white in the browser.',
+
+    'add_header_footer'    => 'Header & Footer',
+    'add_header_footer_desc' => 'Add custom text headers and footers to every page.',
+
+    'reverse_pages'        => 'Reverse Pages',
+    'reverse_pages_desc'   => 'Reverse the page order of a PDF document.',
+
+    'txt_to_pdf'           => 'TXT to PDF',
+    'txt_to_pdf_desc'      => 'Convert plain text files to a formatted PDF.',
+
+    'n_up_pdf'             => 'N-up PDF',
+    'n_up_pdf_desc'        => 'Print multiple pages on one sheet (2-up, 4-up, 9-up).',
+
+    'markdown_to_pdf'      => 'Markdown to PDF',
+    'markdown_to_pdf_desc' => 'Convert Markdown files or text to a styled PDF.',
     
     'protect_pdf' => 'Protect PDF',
     'protect_pdf_desc' => 'Add a password to your PDF.',

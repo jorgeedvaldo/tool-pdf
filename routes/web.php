@@ -195,6 +195,40 @@ Route::group([
         return view('tools.repair_pdf');
     })->name('tool.repair_pdf');
 
+    // ── New tools ─────────────────────────────────────────────────────────────
+
+    Route::get('/tool/workflow-editor', function () {
+        return view('tools.workflow_editor');
+    })->name('tool.workflow_editor');
+
+    Route::get('/tool/pdf-to-grayscale', function () {
+        return view('tools.pdf_to_grayscale');
+    })->name('tool.pdf_to_grayscale');
+
+    Route::get('/tool/add-header-footer', function () {
+        return view('tools.add_header_footer');
+    })->name('tool.add_header_footer');
+
+    Route::get('/tool/reverse-pages', function () {
+        return view('tools.reverse_pages');
+    })->name('tool.reverse_pages');
+
+    Route::get('/tool/txt-to-pdf', function () {
+        return view('tools.txt_to_pdf');
+    })->name('tool.txt_to_pdf');
+
+    Route::get('/tool/n-up-pdf', function () {
+        return view('tools.n_up_pdf');
+    })->name('tool.n_up_pdf');
+
+    Route::get('/tool/extract-images', function () {
+        return view('tools.extract_images');
+    })->name('tool.extract_images');
+
+    Route::get('/tool/markdown-to-pdf', function () {
+        return view('tools.markdown_to_pdf');
+    })->name('tool.markdown_to_pdf');
+
     // Info Pages
     Route::get('/about', function () {
         return view('pages.about');
