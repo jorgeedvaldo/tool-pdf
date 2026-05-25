@@ -313,8 +313,8 @@
             @foreach($recentPosts as $post)
             <div class="col-md-4">
                 <div class="card h-100 shadow-sm border rounded">
-                    @if($post->image)
-                        <img src="{{ asset('storage/' . $post->image) }}" class="card-img-top" alt="{{ $post->title }}" style="height: 200px; object-fit: cover;">
+                    @if($post->thumbnail ?? $post->image)
+                        <img src="{{ asset('storage/' . ($post->thumbnail ?? $post->image)) }}" class="card-img-top" alt="{{ $post->title }}" style="height: 200px; object-fit: cover;" loading="lazy">
                     @else
                         <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
                             <i class="bi bi-image text-muted fs-1"></i>

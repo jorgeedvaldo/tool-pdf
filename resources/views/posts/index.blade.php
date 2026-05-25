@@ -16,8 +16,8 @@
             @foreach($posts as $post)
                 <div class="col-md-6 col-lg-4">
                     <div class="card h-100 shadow-sm tool-card border-0">
-                        @if($post->image)
-                            <img src="{{ Storage::url($post->image) }}" class="card-img-top" alt="{{ $post->title }}" style="height: 220px; object-fit: cover;">
+                        @if($post->thumbnail ?? $post->image)
+                            <img src="{{ Storage::url($post->thumbnail ?? $post->image) }}" class="card-img-top" alt="{{ $post->title }}" style="height: 220px; object-fit: cover;" loading="lazy">
                         @else
                             <div class="bg-primary bg-gradient card-img-top d-flex align-items-center justify-content-center" style="height: 220px;">
                                 <i class="bi bi-journal-text text-white" style="font-size: 4rem;"></i>

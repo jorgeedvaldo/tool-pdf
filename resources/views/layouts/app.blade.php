@@ -36,14 +36,14 @@
     <meta property="article:published_time" content="" />
     <meta property="article:modified_time" content="" />
     <meta property="og:site_name" content="ToolPDF" />
-    <meta property="og:image" content="{{ asset('img/logo.svg') }}" />
+    <meta property="og:image" content="@yield('og_image', asset('favicon.png'))" />
     <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="700" />
-    <meta property="og:image:alt" content="ToolPDF Logo" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="@yield('title', __('messages.title'))" />
     <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}" />
     <meta name="author" content="Edivaldo" />
     <meta name="twitter:text:title" content="@yield('title', __('messages.title'))" />
-    <meta name="twitter:image" content="{{ asset('img/logo.svg') }}" />
+    <meta name="twitter:image" content="@yield('og_image', asset('favicon.png'))" />
     <meta name="twitter:card" content="summary_large_image" />
     <!-- JSON-LD SEO Schema -->
     <script type="application/ld+json">

@@ -2,6 +2,11 @@
 
 @section('title', $post->title . ' - ToolPDF Blog')
 
+@php $ogImg = $post->og_image ?? $post->image; @endphp
+@if($ogImg)
+    @section('og_image', url(Storage::url($ogImg)))
+@endif
+
 @section('content')
 <!-- NewsArticle JSON-LD -->
 <script type="application/ld+json">
@@ -10,7 +15,7 @@
   "@type": "NewsArticle",
   "headline": "{{ $post->title }}",
   "image": [
-    "{{ $post->image ? url(Storage::url($post->image)) : asset('img/logo.svg') }}"
+    "{{ $ogImg ? url(Storage::url($ogImg)) : asset('favicon.png') }}"
    ],
   "datePublished": "{{ $post->created_at->toIso8601String() }}",
   "dateModified": "{{ $post->updated_at->toIso8601String() }}",
