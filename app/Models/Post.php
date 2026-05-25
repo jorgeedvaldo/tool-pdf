@@ -11,7 +11,7 @@ class Post extends Model
     use HasFactory;
 
     protected $fillable = [
-        'title', 'slug', 'language', 'description', 'image'
+        'title', 'slug', 'language', 'description', 'image', 'thumbnail', 'og_image'
     ];
 
     protected static function boot()
@@ -36,7 +36,10 @@ class Post extends Model
             if (empty($post->image)) {
                 try {
                     $imageController = new \App\Http\Controllers\ArticleImageController();
-                    $post->image = $imageController->generate($post->title);
+                    $variants = $imageController->generate($post->title, $post->language ?? 'en');
+                    $post->image     = $variants['image'];
+                    $post->thumbnail = $variants['thumbnail'];
+                    $post->og_image  = $variants['og_image'];
                     $post->saveQuietly();
                 }
                 catch (\Exception $e) {

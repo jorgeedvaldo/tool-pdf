@@ -41,6 +41,15 @@ class PostResource extends Resource
                             ])->required(),
                         Forms\Components\RichEditor::make('description')->required(),
                         Forms\Components\FileUpload::make('image')
+                            ->label('Cover image (auto-generated if left empty)')
+                            ->directory('images/posts')
+                            ->image(),
+                        Forms\Components\FileUpload::make('thumbnail')
+                            ->label('Thumbnail (auto-generated if left empty)')
+                            ->directory('images/posts')
+                            ->image(),
+                        Forms\Components\FileUpload::make('og_image')
+                            ->label('Open Graph image (auto-generated if left empty)')
                             ->directory('images/posts')
                             ->image(),
                     ])
