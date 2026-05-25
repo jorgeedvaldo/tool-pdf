@@ -19,8 +19,9 @@ class Post extends Model
         parent::boot();
 
         static::creating(function ($post) {
-            $post->slug = $post->generateSlug($post->title, $post->id);
-            $post->save(); // NOTE: this was here but calling save() inside creating() causes infinite loops or double inserts
+            if (empty($post->slug)) {
+                $post->slug = $post->generateSlug($post->title);
+            }
         });
 
         static::updating(function ($post) {
@@ -49,11 +50,13 @@ class Post extends Model
         });
     }
 
-    private function generateSlug($title, $id)
+    private function generateSlug($title)
     {
-        if (static::whereSlug($slug = Str::slug($title))->exists()) {
-            $max = static::whereTitle($title)->latest('id');
-            $slug = $slug . '-' . $id;
+        $base = Str::slug($title) ?: 'post';
+        $slug = $base;
+        $suffix = 2;
+        while (static::whereSlug($slug)->exists()) {
+            $slug = $base . '-' . $suffix++;
         }
         return $slug;
     }
