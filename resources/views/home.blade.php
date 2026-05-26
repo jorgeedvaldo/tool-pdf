@@ -117,6 +117,7 @@
             'icon' => 'bi-file-diff',
             'tools' => [
                 ['id' => 'compare_pdf', 'icon' => 'bi-file-diff', 'color' => 'red'],
+                ['id' => 'view_pdf',    'icon' => 'bi-eye',        'color' => 'blue'],
             ]
         ],
         [

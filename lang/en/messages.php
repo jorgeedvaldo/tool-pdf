@@ -101,6 +101,11 @@ return [
 
     'markdown_to_pdf'      => 'Markdown to PDF',
     'markdown_to_pdf_desc' => 'Convert Markdown files or text to a styled PDF.',
+
+    'view_pdf'             => 'View PDF',
+    'view_pdf_desc'        => 'Open and read any PDF file directly in your browser.',
+    'view_pdf_choose'      => 'Choose PDF File',
+    'view_pdf_privacy'     => 'Processed entirely in your browser. No file is uploaded.',
     
     'protect_pdf' => 'Protect PDF',
     'protect_pdf_desc' => 'Add a password to your PDF.',
