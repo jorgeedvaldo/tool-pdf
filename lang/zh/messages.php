@@ -108,6 +108,11 @@ return [
 
     'compare_pdf' => '比较 PDF',
     'compare_pdf_desc' => '在两个 PDF 文档之间查找视觉和文本差异。',
+
+    'view_pdf'             => '查看 PDF',
+    'view_pdf_desc'        => '直接在浏览器中打开并阅读任何 PDF 文件。',
+    'view_pdf_choose'      => '选择 PDF 文件',
+    'view_pdf_privacy'     => '完全在浏览器中处理，不上传任何文件。',
     
     'optimize_web' => '网页优化',
     'optimize_web_desc' => '改善PDF的在线加载速度。',

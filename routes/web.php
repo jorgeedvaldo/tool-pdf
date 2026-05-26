@@ -229,6 +229,10 @@ Route::group([
         return view('tools.markdown_to_pdf');
     })->name('tool.markdown_to_pdf');
 
+    Route::get('/tool/view-pdf', function () {
+        return view('tools.view_pdf');
+    })->name('tool.view_pdf');
+
     // Info Pages
     Route::get('/about', function () {
         return view('pages.about');

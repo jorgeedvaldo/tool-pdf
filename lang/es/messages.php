@@ -108,6 +108,11 @@ return [
 
     'compare_pdf' => 'Comparar PDF',
     'compare_pdf_desc' => 'Encuentra diferencias visuales y textuales entre dos documentos PDF.',
+
+    'view_pdf'             => 'Ver PDF',
+    'view_pdf_desc'        => 'Abre y lee cualquier archivo PDF directamente en el navegador.',
+    'view_pdf_choose'      => 'Elegir archivo PDF',
+    'view_pdf_privacy'     => 'Procesado completamente en tu navegador. Ningún archivo se sube.',
     
     'optimize_web' => 'Optimizar para Web',
     'optimize_web_desc' => 'Mejorar carga online.',
