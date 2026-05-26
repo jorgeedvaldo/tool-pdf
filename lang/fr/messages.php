@@ -198,7 +198,7 @@ return [
     'about_feat_noregister'     => 'Sans inscription',
     'about_feat_nowatermark'    => 'Sans filigranes',
     'about_feat_nolimit'        => 'Sans limites de fichiers',
-    'about_card_privacy_title'  => 'La Confidentialité d'Abord',
+    'about_card_privacy_title'  => 'La Confidentialité d\'Abord',
     'about_card_privacy_text'   => 'Les fichiers sont traités dans le navigateur ou supprimés du serveur immédiatement après la conversion.',
     'about_card_speed_title'    => 'Traitement Instantané',
     'about_card_speed_text'     => 'Les outils du navigateur traitent vos PDFs localement en millisecondes — sans attendre les uploads.',
@@ -208,19 +208,19 @@ return [
     'about_card_open_text'      => 'Le code est ouvert sur GitHub. Inspectez, signalez des problèmes ou contribuez de nouveaux outils.',
     'about_tools_label'         => 'Ce Que Nous Offrons',
     'about_tools_title'         => 'Plus de 30 outils en 4 catégories',
-    'about_tools_subtitle'      => 'Des tâches d'organisation rapide aux conversions complexes et aux fonctionnalités de sécurité.',
+    'about_tools_subtitle'      => 'Des tâches d\'organisation rapide aux conversions complexes et aux fonctionnalités de sécurité.',
     'about_how_label'           => 'Comment Ça Marche',
     'about_how_title'           => 'Deux modes de traitement',
     'about_how_browser_title'   => 'Dans le Navigateur (sans upload)',
-    'about_how_b1'              => 'Vous déposez un fichier dans l'outil — il est lu par l'API File du navigateur.',
+    'about_how_b1'              => 'Vous déposez un fichier dans l\'outil — il est lu par l\'API File du navigateur.',
     'about_how_b2'              => 'PDF.js affiche les pages ; pdf-lib ou jsPDF modifie les octets en mémoire.',
-    'about_how_b3'              => 'Le résultat est généré côté client — aucune requête réseau n'est effectuée.',
+    'about_how_b3'              => 'Le résultat est généré côté client — aucune requête réseau n\'est effectuée.',
     'about_how_b4'              => 'Le fichier est téléchargé directement sur votre appareil via une URL blob.',
     'about_how_server_title'    => 'Serveur (Word, Excel, PPT, HTML)',
     'about_how_s1'              => 'Votre fichier est envoyé via HTTPS POST chiffré à notre serveur.',
     'about_how_s2'              => 'PHPWord / mPDF / PhpSpreadsheet convertit le fichier dans un répertoire temporaire isolé.',
     'about_how_s3'              => 'Le fichier converti est renvoyé immédiatement au navigateur.',
-    'about_how_s4'              => 'Le fichier temporaire est supprimé automatiquement — rien n'est conservé.',
+    'about_how_s4'              => 'Le fichier temporaire est supprimé automatiquement — rien n\'est conservé.',
     'about_tech_label'          => 'Technologie',
     'about_tech_title'          => 'Construit avec des outils open-source éprouvés',
     'about_tech_smart_title'    => 'Analyse Intelligente PDF→DOCX',
@@ -231,9 +231,9 @@ return [
     'about_priv1_title'         => 'Traité sur votre appareil',
     'about_priv1_text'          => 'La plupart des outils fonctionnent à 100% dans le navigateur. Les octets PDF ne voyagent jamais vers un serveur.',
     'about_priv2_title'         => 'Supprimé instantanément',
-    'about_priv2_text'          => 'Pour les conversions côté serveur, les fichiers sont auto-supprimés immédiatement après l'envoi de la réponse.',
+    'about_priv2_text'          => 'Pour les conversions côté serveur, les fichiers sont auto-supprimés immédiatement après l\'envoi de la réponse.',
     'about_priv3_title'         => 'Sans suivi ni profilage',
-    'about_priv3_text'          => 'Nous utilisons uniquement des analyses anonymes et agrégées. Aucune métadonnée de fichier n'est collectée.',
+    'about_priv3_text'          => 'Nous utilisons uniquement des analyses anonymes et agrégées. Aucune métadonnée de fichier n\'est collectée.',
     'about_contact_label'       => 'Contact',
     'about_contact_title'       => 'Des questions ou des commentaires?',
     'about_contact_text'        => 'Ouvrez un issue sur GitHub, lisez notre blog ou consultez notre politique de confidentialité.',
@@ -2093,6 +2093,85 @@ HTML,
         
         <div class="mt-4">
             <a href="https://toolpdf.org/fr/tool/compress-pdf" class="btn btn-success btn-lg px-4 py-3 fw-bold shadow-sm">Compresser le PDF Maintenant</a>
+        </div>
+    </section>
+</article>
+HTML,
+
+    'article_view_pdf_content' => <<<'HTML'
+<article>
+    <header>
+        <h1 class="h3 fw-bold mb-3">Lecteur PDF en Ligne Gratuit — Ouvrez et Lisez Tout PDF dans Votre Navigateur (2026)</h1>
+        <p class="lead text-secondary">Affichez, lisez et parcourez vos documents PDF instantanément, sans logiciel à installer et sans envoyer aucun fichier à un serveur.</p>
+    </header>
+
+    <hr class="my-4">
+
+    <section id="introduction" class="mb-4">
+        <h2 class="h4 fw-bold mb-3">Qu'est-ce qu'un Lecteur PDF en Ligne ?</h2>
+        <p class="text-secondary">Un lecteur PDF est un outil qui vous permet d'ouvrir et de lire des fichiers PDF directement. Notre <strong>lecteur PDF en ligne</strong> gratuit fonctionne entièrement dans votre navigateur, vous permettant d'ouvrir contrats, factures, livres numériques, manuels, documents scannés et présentations sur n'importe quel appareil — Windows, Mac, Linux, Android ou iPhone — sans télécharger Adobe Acrobat ni aucun autre programme.</p>
+        <p class="text-secondary">Comme le rendu s'effectue localement avec le moteur open source <strong>PDF.js</strong>, votre document ne quitte jamais votre ordinateur. Aucun envoi, aucune attente et aucun risque pour la vie privée : dès que vous sélectionnez un fichier, il s'affiche directement depuis la mémoire de votre appareil.</p>
+    </section>
+
+    <section id="how-to" class="mb-4">
+        <h2 class="h4 fw-bold mb-3">Comment Lire un PDF en Ligne en 3 Étapes</h2>
+        <ol class="text-secondary">
+            <li class="mb-2"><strong>Ouvrez le fichier.</strong> Cliquez sur la zone de dépôt ou glissez-déposez simplement votre PDF sur la page.</li>
+            <li class="mb-2"><strong>Lisez et naviguez.</strong> Tournez les pages avec les flèches, accédez à n'importe quelle page via le panneau de vignettes, ou faites défiler en continu en mode « toutes les pages ».</li>
+            <li class="mb-2"><strong>Zoomez, ajustez et présentez.</strong> Zoomez pour les détails, ajustez la page à la largeur de l'écran, ou passez en plein écran pour une lecture sans distraction.</li>
+        </ol>
+        <p class="text-secondary">Une fois terminé, vous pouvez retélécharger le fichier original en un seul clic — rien n'est modifié.</p>
+    </section>
+
+    <section id="features" class="mb-4">
+        <h2 class="h4 fw-bold mb-3">Fonctionnalités Clés du Lecteur ToolPDF</h2>
+
+        <h3 class="h5 fw-bold mt-4">1. 100% Privé — Aucun Envoi Requis</h3>
+        <p class="text-secondary">Contrairement à la plupart des lecteurs « en ligne » qui envoient votre fichier vers un serveur distant, ce lecteur traite tout dans votre navigateur. Contrats confidentiels, dossiers médicaux et relevés financiers restent sur votre machine.</p>
+
+        <h3 class="h5 fw-bold mt-4">2. Navigation Rapide et Vignettes</h3>
+        <p class="text-secondary">Un panneau de vignettes en direct vous donne un aperçu instantané de tout le document. Cliquez sur une vignette pour accéder directement à cette page, ou utilisez les flèches du clavier et le champ de numéro de page pour une navigation précise.</p>
+
+        <h3 class="h5 fw-bold mt-4">3. Zoom et Modes de Lecture Flexibles</h3>
+        <p class="text-secondary">Lisez une page à la fois ou faites défiler toutes les pages en continu. Réglez le zoom de 25% à 400%, ajustez automatiquement à la largeur et passez en plein écran pour vos présentations.</p>
+
+        <h3 class="h5 fw-bold mt-4">4. Fonctionne sur Tous les Appareils</h3>
+        <p class="text-secondary">Aucune installation, aucun plugin, aucune inscription. Le lecteur fonctionne sur Chrome, Firefox, Safari et Edge, sur ordinateur comme sur mobile — entièrement gratuit, sans limite de fichiers.</p>
+    </section>
+
+    <section id="use-cases" class="mb-4">
+        <h2 class="h4 fw-bold mb-3">Usages Courants</h2>
+        <ul class="text-secondary">
+            <li>Prévisualiser rapidement un PDF avant de l'imprimer, le signer ou le partager.</li>
+            <li>Ouvrir des pièces jointes d'e-mails sans les confier à un cloud tiers.</li>
+            <li>Lire des livres numériques, des articles universitaires et des manuels en déplacement.</li>
+            <li>Vérifier qu'un PDF converti ou compressé s'affiche correctement.</li>
+        </ul>
+    </section>
+
+    <section id="faq" class="mb-4">
+        <h2 class="h4 fw-bold mb-3">Questions Fréquentes</h2>
+
+        <h3 class="h6 fw-bold mt-3">Ce lecteur PDF est-il vraiment gratuit ?</h3>
+        <p class="text-secondary">Oui. Le lecteur ToolPDF est 100% gratuit, sans inscription, filigrane ni limite de pages.</p>
+
+        <h3 class="h6 fw-bold mt-3">Mes fichiers PDF sont-ils envoyés à un serveur ?</h3>
+        <p class="text-secondary">Non. Vos fichiers sont ouverts et rendus localement dans votre navigateur. Ils ne sont jamais transmis ni stockés sur un serveur, ce qui rend l'outil idéal pour les documents confidentiels.</p>
+
+        <h3 class="h6 fw-bold mt-3">Dois-je installer Adobe Acrobat ou un logiciel ?</h3>
+        <p class="text-secondary">Pas du tout. Tout s'exécute dans votre navigateur, il n'y a donc rien à télécharger ni à installer.</p>
+
+        <h3 class="h6 fw-bold mt-3">Puis-je consulter des PDF protégés par mot de passe ?</h3>
+        <p class="text-secondary">Les PDF chiffrés nécessitent le bon mot de passe pour être ouverts. Pour supprimer un mot de passe connu, utilisez notre outil dédié Déverrouiller PDF.</p>
+    </section>
+
+    <section id="conclusion" class="mb-4 text-center">
+        <hr class="my-5">
+        <h2 class="h4 fw-bold mb-3">Ouvrez Votre PDF Maintenant</h2>
+        <p class="text-secondary mb-4">Lisez n'importe quel document en toute sécurité dans votre navigateur — rapide, privé et entièrement gratuit.</p>
+
+        <div class="mt-4">
+            <a href="https://toolpdf.org/fr/tool/view-pdf" class="btn btn-primary btn-lg px-4 py-3 fw-bold shadow-sm">Ouvrir le Lecteur PDF</a>
         </div>
     </section>
 </article>

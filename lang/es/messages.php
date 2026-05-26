@@ -2097,6 +2097,85 @@ HTML,
     </section>
 </article>
 HTML,
+
+    'article_view_pdf_content' => <<<'HTML'
+<article>
+    <header>
+        <h1 class="h3 fw-bold mb-3">Visor de PDF Online Gratis — Abre y Lee Cualquier PDF en tu Navegador (2026)</h1>
+        <p class="lead text-secondary">Visualiza, lee y navega documentos PDF al instante, sin instalar software y sin subir archivos a ningún servidor.</p>
+    </header>
+
+    <hr class="my-4">
+
+    <section id="introduction" class="mb-4">
+        <h2 class="h4 fw-bold mb-3">¿Qué Es un Visor de PDF Online?</h2>
+        <p class="text-secondary">Un visor de PDF es una herramienta que te permite abrir y leer archivos PDF directamente. Nuestro <strong>visor de PDF online</strong> gratuito funciona por completo dentro de tu navegador, así que puedes abrir contratos, facturas, libros electrónicos, manuales, documentos escaneados y presentaciones en cualquier dispositivo — Windows, Mac, Linux, Android o iPhone — sin descargar Adobe Acrobat ni ningún otro programa.</p>
+        <p class="text-secondary">Como la renderización ocurre localmente con el motor de código abierto <strong>PDF.js</strong>, tu documento nunca sale de tu computadora. No hay subida, no hay espera y no hay riesgo de privacidad: en cuanto seleccionas un archivo, se muestra directamente desde la memoria de tu dispositivo.</p>
+    </section>
+
+    <section id="how-to" class="mb-4">
+        <h2 class="h4 fw-bold mb-3">Cómo Ver un PDF Online en 3 Pasos</h2>
+        <ol class="text-secondary">
+            <li class="mb-2"><strong>Abre el archivo.</strong> Haz clic en el área de carga o simplemente arrastra y suelta tu PDF en la página.</li>
+            <li class="mb-2"><strong>Lee y navega.</strong> Pasa las páginas con las flechas, salta a cualquier página con el panel de miniaturas, o desplázate de forma continua en el modo "todas las páginas".</li>
+            <li class="mb-2"><strong>Amplía, ajusta y presenta.</strong> Aumenta el zoom para ver detalles, ajusta la página al ancho de la pantalla o entra en pantalla completa para una lectura sin distracciones.</li>
+        </ol>
+        <p class="text-secondary">Cuando termines puedes volver a descargar el archivo original con un solo clic — nada se modifica.</p>
+    </section>
+
+    <section id="features" class="mb-4">
+        <h2 class="h4 fw-bold mb-3">Características Clave del Visor ToolPDF</h2>
+
+        <h3 class="h5 fw-bold mt-4">1. 100% Privado — Sin Necesidad de Subir</h3>
+        <p class="text-secondary">A diferencia de la mayoría de los lectores "online" que envían tu archivo a un servidor remoto, este visor procesa todo en tu navegador. Contratos confidenciales, historiales médicos y estados financieros permanecen en tu equipo.</p>
+
+        <h3 class="h5 fw-bold mt-4">2. Navegación Rápida y Miniaturas</h3>
+        <p class="text-secondary">Un panel de miniaturas en vivo te da una visión instantánea de todo el documento. Haz clic en cualquier miniatura para saltar a esa página, o usa las flechas del teclado y el campo de número de página para una navegación precisa.</p>
+
+        <h3 class="h5 fw-bold mt-4">3. Zoom y Modos de Lectura Flexibles</h3>
+        <p class="text-secondary">Lee una página a la vez o desplázate por todas las páginas de forma continua. Ajusta el zoom del 25% al 400%, encaja al ancho automáticamente y entra en pantalla completa para presentaciones.</p>
+
+        <h3 class="h5 fw-bold mt-4">4. Funciona en Todos los Dispositivos</h3>
+        <p class="text-secondary">Sin instalación, sin complementos, sin registro. El visor funciona en Chrome, Firefox, Safari y Edge, tanto en escritorio como en móvil — totalmente gratis, sin límite de archivos.</p>
+    </section>
+
+    <section id="use-cases" class="mb-4">
+        <h2 class="h4 fw-bold mb-3">Usos Populares</h2>
+        <ul class="text-secondary">
+            <li>Previsualizar rápidamente un PDF antes de imprimir, firmar o compartir.</li>
+            <li>Abrir archivos adjuntos de correo sin confiarlos a una nube de terceros.</li>
+            <li>Leer libros electrónicos, artículos académicos y manuales sobre la marcha.</li>
+            <li>Comprobar que un PDF convertido o comprimido se ve correctamente.</li>
+        </ul>
+    </section>
+
+    <section id="faq" class="mb-4">
+        <h2 class="h4 fw-bold mb-3">Preguntas Frecuentes</h2>
+
+        <h3 class="h6 fw-bold mt-3">¿Este visor de PDF es realmente gratis?</h3>
+        <p class="text-secondary">Sí. El visor ToolPDF es 100% gratuito, sin registro, marcas de agua ni límites de páginas.</p>
+
+        <h3 class="h6 fw-bold mt-3">¿Mis archivos PDF se suben a un servidor?</h3>
+        <p class="text-secondary">No. Tus archivos se abren y renderizan localmente en tu navegador. Nunca se transmiten ni almacenan en ningún servidor, lo que hace la herramienta ideal para documentos confidenciales.</p>
+
+        <h3 class="h6 fw-bold mt-3">¿Necesito instalar Adobe Acrobat o algún software?</h3>
+        <p class="text-secondary">En absoluto. Todo se ejecuta dentro de tu navegador, así que no hay nada que descargar ni instalar.</p>
+
+        <h3 class="h6 fw-bold mt-3">¿Puedo ver PDF protegidos con contraseña?</h3>
+        <p class="text-secondary">Los PDF cifrados requieren la contraseña correcta para abrirse. Para eliminar una contraseña conocida, usa nuestra herramienta dedicada Desbloquear PDF.</p>
+    </section>
+
+    <section id="conclusion" class="mb-4 text-center">
+        <hr class="my-5">
+        <h2 class="h4 fw-bold mb-3">Abre tu PDF Ahora</h2>
+        <p class="text-secondary mb-4">Lee cualquier documento de forma segura en tu navegador — rápido, privado y totalmente gratis.</p>
+
+        <div class="mt-4">
+            <a href="https://toolpdf.org/es/tool/view-pdf" class="btn btn-primary btn-lg px-4 py-3 fw-bold shadow-sm">Abrir Visor de PDF</a>
+        </div>
+    </section>
+</article>
+HTML,
 ];
 
 

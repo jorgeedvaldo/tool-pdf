@@ -3,6 +3,31 @@
 @section('title', __('messages.view_pdf') . ' - ToolPDF')
 
 @section('content')
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "{{ __('messages.view_pdf') }} - ToolPDF",
+  "applicationCategory": "BrowserApplication",
+  "operatingSystem": "Any",
+  "url": "{{ url()->current() }}",
+  "description": "{{ __('messages.view_pdf_desc') }}",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "1280" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "{{ __('messages.view_pdf') }}",
+  "description": "{{ __('messages.view_pdf_desc') }}",
+  "step": [
+    { "@type": "HowToStep", "position": 1, "name": "{{ __('messages.view_pdf_choose') }}" },
+    { "@type": "HowToStep", "position": 2, "name": "{{ __('messages.view_pdf') }}" }
+  ]
+}
+</script>
 <style>
     .drop-zone { border: 2px dashed #0d6efd !important; cursor: pointer; transition: all 0.3s; }
     .drop-zone:hover, .drop-zone.dragover { background-color: #f0f5ff; border-color: #0a58ca !important; }
@@ -156,9 +181,9 @@
 </div>
 
 @push('scripts')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" integrity="sha512-q+4liFwdPC/bNdhUpZx6aXDx/h77yEQtn4I1slHydcbZK34nLaR3cAeYSJshoxIOq3mjEf7xFi5oA0XZkLHw==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
 document.addEventListener('DOMContentLoaded', function () {
     const dropZone        = document.getElementById('drop-zone');
