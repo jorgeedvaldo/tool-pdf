@@ -12,7 +12,6 @@ use PhpOffice\PhpPresentation\PhpPresentation;
 use PhpOffice\PhpPresentation\Shape\RichText as RichTextShape;
 use Smalot\PdfParser\Parser as PdfParser;
 use Mpdf\Mpdf;
-use Mpdf\HTMLParserMode;
 
 class ConvertController extends Controller
 {
@@ -120,19 +119,46 @@ class ConvertController extends Controller
             $phpWord = WordIOFactory::load($inputPath);
             $htmlPath = $tmpDir . '/document.html';
 
-            // PhpWord's PDF writer passes the complete generated HTML to mPDF in
-            // one WriteHTML() call. Large documents can exceed PHP's
-            // pcre.backtrack_limit while mPDF parses that string, so generate the
-            // intermediate HTML ourselves and feed it to mPDF incrementally.
+            // Keep the document intact when passing it to mPDF. Splitting HTML at
+            // arbitrary byte boundaries leaves tables and block elements open;
+            // mPDF then repeatedly repairs the malformed fragments and can create
+            // thousands of blank pages. Raise PCRE's parsing allowance for this
+            // conversion instead, and restore the process setting afterwards.
             WordIOFactory::createWriter($phpWord, 'HTML')->save($htmlPath);
+
+            $html = file_get_contents($htmlPath);
+            if ($html === false || trim($html) === '') {
+                throw new \RuntimeException('The Word document did not contain any content that could be converted.');
+            }
 
             $mpdf = new Mpdf([
                 'tempDir'      => $tmpDir,
                 'default_font' => 'dejavusans',
             ]);
             $mpdf->SetBasePath($tmpDir . '/');
-            $this->writeHtmlInChunks($mpdf, file_get_contents($htmlPath));
+
+            $previousBacktrackLimit = ini_get('pcre.backtrack_limit');
+            $requiredBacktrackLimit = max(
+                (int) $previousBacktrackLimit,
+                strlen($html) * 2 + 1000000
+            );
+            ini_set('pcre.backtrack_limit', (string) $requiredBacktrackLimit);
+            try {
+                $mpdf->WriteHTML($html);
+            } finally {
+                if ($previousBacktrackLimit !== false) {
+                    ini_set('pcre.backtrack_limit', (string) $previousBacktrackLimit);
+                }
+            }
+
+            if ($mpdf->page < 1) {
+                throw new \RuntimeException('The Word document did not produce a valid PDF page.');
+            }
             $mpdf->Output($outputPath, 'F');
+
+            if (!is_file($outputPath) || filesize($outputPath) === 0) {
+                throw new \RuntimeException('The PDF could not be generated.');
+            }
 
             $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
 
@@ -140,102 +166,11 @@ class ConvertController extends Controller
                 'Content-Type' => 'application/pdf',
             ])->deleteFileAfterSend(false);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         } finally {
             $this->scheduleTmpCleanup($tmpDir);
         }
-    }
-
-    /**
-     * Send generated Word HTML to mPDF without presenting PCRE with one very
-     * large subject. DOM nodes are preferred as natural chunk boundaries; an
-     * unusually large node is split only between HTML tokens.
-     */
-    private function writeHtmlInChunks(Mpdf $mpdf, string $html, int $maxChunkBytes = 250000): void
-    {
-        $document = new \DOMDocument();
-        $previous = libxml_use_internal_errors(true);
-        $document->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-        libxml_clear_errors();
-        libxml_use_internal_errors($previous);
-
-        $styles = '';
-        foreach ($document->getElementsByTagName('style') as $style) {
-            $styles .= $style->textContent . "\n";
-        }
-        if ($styles !== '') {
-            $mpdf->WriteHTML($styles, HTMLParserMode::HEADER_CSS);
-        }
-
-        $body = $document->getElementsByTagName('body')->item(0);
-        $nodes = $body ? iterator_to_array($body->childNodes) : iterator_to_array($document->childNodes);
-        $buffer = '';
-
-        foreach ($nodes as $node) {
-            if ($node instanceof \DOMElement && strtolower($node->tagName) === 'style') {
-                continue;
-            }
-
-            $fragment = $document->saveHTML($node);
-            if ($fragment === false || $fragment === '') {
-                continue;
-            }
-
-            if (strlen($buffer) + strlen($fragment) <= $maxChunkBytes) {
-                $buffer .= $fragment;
-                continue;
-            }
-
-            if ($buffer !== '') {
-                $mpdf->WriteHTML($buffer, HTMLParserMode::HTML_BODY);
-                $buffer = '';
-            }
-
-            if (strlen($fragment) <= $maxChunkBytes) {
-                $buffer = $fragment;
-                continue;
-            }
-
-            foreach ($this->splitHtmlFragment($fragment, $maxChunkBytes) as $chunk) {
-                $mpdf->WriteHTML($chunk, HTMLParserMode::HTML_BODY);
-            }
-        }
-
-        if ($buffer !== '') {
-            $mpdf->WriteHTML($buffer, HTMLParserMode::HTML_BODY);
-        }
-    }
-
-    /** @return array<int, string> */
-    private function splitHtmlFragment(string $html, int $maxChunkBytes): array
-    {
-        $tokens = preg_split('/(<[^>]+>)/s', $html, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
-        $chunks = [];
-        $buffer = '';
-
-        foreach ($tokens ?: [$html] as $token) {
-            while (strlen($token) > $maxChunkBytes) {
-                if ($buffer !== '') {
-                    $chunks[] = $buffer;
-                    $buffer = '';
-                }
-                $chunks[] = substr($token, 0, $maxChunkBytes);
-                $token = substr($token, $maxChunkBytes);
-            }
-
-            if (strlen($buffer) + strlen($token) > $maxChunkBytes) {
-                $chunks[] = $buffer;
-                $buffer = '';
-            }
-            $buffer .= $token;
-        }
-
-        if ($buffer !== '') {
-            $chunks[] = $buffer;
-        }
-
-        return $chunks;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
