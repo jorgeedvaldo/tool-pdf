@@ -149,7 +149,7 @@ class ConvertController extends Controller
             $htmlPath = $tmpDir . '/document.html';
             WordIOFactory::createWriter($phpWord, 'HTML')->save($htmlPath);
 
-            $mpdf = $this->renderWordHtmlToPdf(file_get_contents($htmlPath), $tmpDir);
+            $mpdf = $this->renderWordHtmlToPdf(file_get_contents($htmlPath), $tmpDir, $phpWord);
             $mpdf->Output($outputPath, 'F');
 
             $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
@@ -249,7 +249,7 @@ class ConvertController extends Controller
      * documents into PDFs thousands of pages long. The page setup is therefore
      * applied directly through mPDF's page API and the named-page CSS is dropped.
      */
-    private function renderWordHtmlToPdf(string $html, string $tmpDir): Mpdf
+    private function renderWordHtmlToPdf(string $html, string $tmpDir, \PhpOffice\PhpWord\PhpWord $phpWord): Mpdf
     {
         $document = new \DOMDocument();
         $previous = libxml_use_internal_errors(true);
@@ -269,14 +269,30 @@ class ConvertController extends Controller
         $sections = $this->splitHtmlIntoSections($document, $pageRules);
 
         $mpdf = $this->makeMpdfForSection($sections[0]['page'], $tmpDir);
+
         if (trim((string) $css) !== '') {
             $mpdf->WriteHTML($css, HTMLParserMode::HEADER_CSS);
         }
 
+        // The HTML writer drops headers and footers entirely, so they are read
+        // straight off the Word sections and attached to mPDF here.
+        $chrome = $this->buildSectionChrome($phpWord);
+
         foreach ($sections as $index => $section) {
+            $sectionChrome = $chrome[$section['word']] ?? ['header' => '', 'footer' => ''];
+
+            // mPDF stamps a header when it opens a page but a footer when it
+            // closes one, and AddPageByArray does both. Setting the header first
+            // and the footer after therefore leaves the outgoing page with the
+            // previous section's footer and gives the new page both of its own.
+            // Passing '' clears the previous section's, which Word would not
+            // carry over either.
+            $mpdf->SetHTMLHeader($sectionChrome['header']);
             if ($index > 0) {
                 $mpdf->AddPageByArray($section['page']);
             }
+            $mpdf->SetHTMLFooter($sectionChrome['footer']);
+
             $this->writeNodesInChunks($mpdf, $document, $section['nodes']);
         }
 
@@ -284,11 +300,142 @@ class ConvertController extends Controller
     }
 
     /**
+     * Collect each Word section's header and footer as HTML, keyed by section
+     * index.
+     *
+     * Word can also vary these by page — a distinct first page, or odd/even
+     * pairs. mPDF reaches both only through its `@page` machinery, which takes
+     * over page geometry for the whole document and re-breaks the pages, the
+     * very behaviour that made these conversions run to thousands of pages. The
+     * section's default variant is therefore used throughout, falling back to
+     * another only when the section defines no default at all.
+     *
+     * @return array<int, array{header: string, footer: string}>
+     */
+    private function buildSectionChrome(\PhpOffice\PhpWord\PhpWord $phpWord): array
+    {
+        $writer = new \PhpOffice\PhpWord\Writer\HTML($phpWord);
+        $chrome = [];
+
+        foreach ($phpWord->getSections() as $index => $section) {
+            $entry = ['header' => '', 'footer' => ''];
+            $isDefault = ['header' => false, 'footer' => false];
+
+            foreach (['header' => $section->getHeaders(), 'footer' => $section->getFooters()] as $slot => $parts) {
+                foreach ($parts as $part) {
+                    if ($isDefault[$slot]) {
+                        continue; // the section's own default already won
+                    }
+
+                    $html = $this->renderHeaderFooter($part, $writer);
+                    if ($html === '') {
+                        continue;
+                    }
+
+                    $entry[$slot] = $html;
+                    $isDefault[$slot] = $part->getType() === \PhpOffice\PhpWord\Element\Footer::AUTO;
+                }
+            }
+
+            $chrome[$index] = $entry;
+        }
+
+        return $chrome;
+    }
+
+    /**
+     * Render one header or footer container to HTML.
+     *
+     * @param \PhpOffice\PhpWord\Element\Footer $container
+     */
+    private function renderHeaderFooter($container, \PhpOffice\PhpWord\Writer\HTML $writer): string
+    {
+        $html = '';
+        foreach ($container->getElements() as $element) {
+            $html .= $this->renderHeaderFooterElement($element, $writer);
+        }
+
+        return trim($html);
+    }
+
+    private function renderHeaderFooterElement(object $element, \PhpOffice\PhpWord\Writer\HTML $writer): string
+    {
+        // A header paragraph containing fields is read back as a single
+        // PreserveText holding the raw `{ PAGE }` macros, and PhpWord ships no
+        // HTML writer for it or for Field, so both are rendered here.
+        if ($element instanceof \PhpOffice\PhpWord\Element\PreserveText) {
+            return $this->renderPreserveText($element);
+        }
+        if ($element instanceof \PhpOffice\PhpWord\Element\Field) {
+            $placeholder = $this->wordFieldPlaceholder($element->getType());
+
+            return $placeholder === '' ? '' : '<p>' . $placeholder . '</p>';
+        }
+
+        $writerClass = str_replace(
+            'PhpOffice\\PhpWord\\Element',
+            'PhpOffice\\PhpWord\\Writer\\HTML\\Element',
+            get_class($element)
+        );
+        if (!class_exists($writerClass)) {
+            return '';
+        }
+
+        return (string) (new $writerClass($writer, $element, false))->write();
+    }
+
+    private function renderPreserveText(\PhpOffice\PhpWord\Element\PreserveText $element): string
+    {
+        $segments = $element->getText();
+        if (!is_array($segments)) {
+            $segments = [(string) $segments];
+        }
+
+        $text = '';
+        foreach ($segments as $segment) {
+            if (preg_match('/^\{(.+)\}$/s', trim((string) $segment), $m)) {
+                $text .= $this->wordFieldPlaceholder($m[1]);
+                continue;
+            }
+            $text .= htmlspecialchars((string) $segment, ENT_QUOTES, 'UTF-8');
+        }
+
+        if (trim($text) === '') {
+            return '';
+        }
+
+        $style = $element->getParagraphStyle();
+        $alignment = is_object($style) && method_exists($style, 'getAlignment') ? $style->getAlignment() : null;
+
+        return '<p' . ($alignment ? ' style="text-align: ' . $alignment . ';"' : '') . '>' . $text . '</p>';
+    }
+
+    /** Translate a Word field into the placeholder mPDF substitutes per page. */
+    private function wordFieldPlaceholder(string $macro): string
+    {
+        $parts = preg_split('#[\s\\\\]+#', trim($macro)) ?: [];
+        $name  = strtoupper($parts[0] ?? '');
+
+        return match ($name) {
+            'PAGE'                                     => '{PAGENO}',
+            'NUMPAGES', 'SECTIONPAGES'                 => '{nb}',
+            'DATE', 'CREATEDATE', 'SAVEDATE', 'PRINTDATE' => '{DATE j/n/Y}',
+            'TIME'                                     => '{DATE H:i}',
+            // Anything else (MERGEFIELD, REF, TOC…) has no per-page meaning here;
+            // printing the raw macro would be worse than leaving it out.
+            default                                    => '',
+        };
+    }
+
+    /**
      * Group the body's children into one entry per Word section, each carrying the
      * page setup from its `@page` rule.
      *
+     * `word` is the index of the Word section a group came from, used to look up
+     * its header and footer; content outside any section div has none.
+     *
      * @param  array<string, array<string, mixed>>  $pageRules
-     * @return array<int, array{page: array<string, mixed>, nodes: array<int, \DOMNode>}>
+     * @return array<int, array{page: array<string, mixed>, nodes: array<int, \DOMNode>, word: int|null}>
      */
     private function splitHtmlIntoSections(\DOMDocument $document, array $pageRules): array
     {
@@ -297,6 +444,7 @@ class ConvertController extends Controller
 
         $sections = [];
         $loose    = [];
+        $wordIndex = 0;
 
         foreach ($topLevel as $node) {
             if ($node instanceof \DOMElement && strtolower($node->tagName) === 'div') {
@@ -307,6 +455,7 @@ class ConvertController extends Controller
                 $sections[] = [
                     'page'  => $pageRules[$name] ?? [],
                     'nodes' => iterator_to_array($node->childNodes),
+                    'word'  => $wordIndex++,
                 ];
                 continue;
             }
@@ -319,10 +468,10 @@ class ConvertController extends Controller
         }
 
         if ($loose !== []) {
-            array_unshift($sections, ['page' => reset($pageRules) ?: [], 'nodes' => $loose]);
+            array_unshift($sections, ['page' => reset($pageRules) ?: [], 'nodes' => $loose, 'word' => null]);
         }
         if ($sections === []) {
-            $sections[] = ['page' => reset($pageRules) ?: [], 'nodes' => $topLevel];
+            $sections[] = ['page' => reset($pageRules) ?: [], 'nodes' => $topLevel, 'word' => 0];
         }
 
         return $sections;
