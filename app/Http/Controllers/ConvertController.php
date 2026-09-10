@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use PhpOffice\PhpWord\IOFactory as WordIOFactory;
-use PhpOffice\PhpWord\Settings as WordSettings;
 use PhpOffice\PhpWord\Element\Section;
 use PhpOffice\PhpSpreadsheet\IOFactory as SpreadsheetIOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -13,6 +12,7 @@ use PhpOffice\PhpPresentation\PhpPresentation;
 use PhpOffice\PhpPresentation\Shape\RichText as RichTextShape;
 use Smalot\PdfParser\Parser as PdfParser;
 use Mpdf\Mpdf;
+use Mpdf\HTMLParserMode;
 
 class ConvertController extends Controller
 {
@@ -117,12 +117,22 @@ class ConvertController extends Controller
             $outputPath = $tmpDir . '/output.pdf';
             $file->move($tmpDir, $inputName);
 
-            WordSettings::setPdfRendererName(WordSettings::PDF_RENDERER_MPDF);
-            WordSettings::setPdfRendererPath(base_path('vendor/mpdf/mpdf'));
-
             $phpWord = WordIOFactory::load($inputPath);
-            $writer  = WordIOFactory::createWriter($phpWord, 'PDF');
-            $writer->save($outputPath);
+            $htmlPath = $tmpDir . '/document.html';
+
+            // PhpWord's PDF writer passes the complete generated HTML to mPDF in
+            // one WriteHTML() call. Large documents can exceed PHP's
+            // pcre.backtrack_limit while mPDF parses that string, so generate the
+            // intermediate HTML ourselves and feed it to mPDF incrementally.
+            WordIOFactory::createWriter($phpWord, 'HTML')->save($htmlPath);
+
+            $mpdf = new Mpdf([
+                'tempDir'      => $tmpDir,
+                'default_font' => 'dejavusans',
+            ]);
+            $mpdf->SetBasePath($tmpDir . '/');
+            $this->writeHtmlInChunks($mpdf, file_get_contents($htmlPath));
+            $mpdf->Output($outputPath, 'F');
 
             $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
 
@@ -135,6 +145,97 @@ class ConvertController extends Controller
         } finally {
             $this->scheduleTmpCleanup($tmpDir);
         }
+    }
+
+    /**
+     * Send generated Word HTML to mPDF without presenting PCRE with one very
+     * large subject. DOM nodes are preferred as natural chunk boundaries; an
+     * unusually large node is split only between HTML tokens.
+     */
+    private function writeHtmlInChunks(Mpdf $mpdf, string $html, int $maxChunkBytes = 250000): void
+    {
+        $document = new \DOMDocument();
+        $previous = libxml_use_internal_errors(true);
+        $document->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+
+        $styles = '';
+        foreach ($document->getElementsByTagName('style') as $style) {
+            $styles .= $style->textContent . "\n";
+        }
+        if ($styles !== '') {
+            $mpdf->WriteHTML($styles, HTMLParserMode::HEADER_CSS);
+        }
+
+        $body = $document->getElementsByTagName('body')->item(0);
+        $nodes = $body ? iterator_to_array($body->childNodes) : iterator_to_array($document->childNodes);
+        $buffer = '';
+
+        foreach ($nodes as $node) {
+            if ($node instanceof \DOMElement && strtolower($node->tagName) === 'style') {
+                continue;
+            }
+
+            $fragment = $document->saveHTML($node);
+            if ($fragment === false || $fragment === '') {
+                continue;
+            }
+
+            if (strlen($buffer) + strlen($fragment) <= $maxChunkBytes) {
+                $buffer .= $fragment;
+                continue;
+            }
+
+            if ($buffer !== '') {
+                $mpdf->WriteHTML($buffer, HTMLParserMode::HTML_BODY);
+                $buffer = '';
+            }
+
+            if (strlen($fragment) <= $maxChunkBytes) {
+                $buffer = $fragment;
+                continue;
+            }
+
+            foreach ($this->splitHtmlFragment($fragment, $maxChunkBytes) as $chunk) {
+                $mpdf->WriteHTML($chunk, HTMLParserMode::HTML_BODY);
+            }
+        }
+
+        if ($buffer !== '') {
+            $mpdf->WriteHTML($buffer, HTMLParserMode::HTML_BODY);
+        }
+    }
+
+    /** @return array<int, string> */
+    private function splitHtmlFragment(string $html, int $maxChunkBytes): array
+    {
+        $tokens = preg_split('/(<[^>]+>)/s', $html, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $chunks = [];
+        $buffer = '';
+
+        foreach ($tokens ?: [$html] as $token) {
+            while (strlen($token) > $maxChunkBytes) {
+                if ($buffer !== '') {
+                    $chunks[] = $buffer;
+                    $buffer = '';
+                }
+                $chunks[] = substr($token, 0, $maxChunkBytes);
+                $token = substr($token, $maxChunkBytes);
+            }
+
+            if (strlen($buffer) + strlen($token) > $maxChunkBytes) {
+                $chunks[] = $buffer;
+                $buffer = '';
+            }
+            $buffer .= $token;
+        }
+
+        if ($buffer !== '') {
+            $chunks[] = $buffer;
+        }
+
+        return $chunks;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
