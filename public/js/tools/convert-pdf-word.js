@@ -104,8 +104,38 @@ $('cw-convert-btn').addEventListener('click', async () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  Core: upload → backend (LibreOffice) → download result
+//  Core: upload → backend conversion → download result
 // ═══════════════════════════════════════════════════════════════════════════
+// Turn a failed response into something the user can act on. The server sends
+// {error: "…"} for conversion problems and Laravel's {message, errors} shape for
+// validation, but limits hit before PHP runs (upload size, timeouts) return HTML
+// or nothing at all.
+async function describeFailure(response) {
+    let payload = null;
+    try { payload = await response.json(); } catch (e) { /* not JSON */ }
+
+    if (payload) {
+        if (payload.error) return payload.error;
+        if (payload.errors) {
+            const first = Object.values(payload.errors)[0];
+            if (Array.isArray(first) && first.length) return first[0];
+        }
+        if (payload.message) return payload.message;
+    }
+
+    if (response.status === 413) {
+        return 'O ficheiro é demasiado grande para o servidor. Tente um ficheiro mais pequeno.';
+    }
+    if (response.status === 419) {
+        return 'A sessão expirou. Recarregue a página e tente novamente.';
+    }
+    if (response.status === 504 || response.status === 408) {
+        return 'A conversão demorou demasiado tempo. Tente um documento mais pequeno.';
+    }
+
+    return `A conversão falhou (HTTP ${response.status}).`;
+}
+
 async function sendConvert(direction) {
     const isPw      = direction === 'pdfToWord';
     const url       = isPw ? window.CW_ROUTES.pdfToWord : window.CW_ROUTES.wordToPdf;
@@ -122,7 +152,7 @@ async function sendConvert(direction) {
     const ticker = setInterval(() => {
         pct = Math.min(pct + 4, 88);
         setProgress(pct, pct < 40 ? 'A enviar ficheiro…' :
-                         pct < 75 ? 'A converter com LibreOffice…' :
+                         pct < 75 ? 'A converter…' :
                                     'A finalizar…');
     }, 600);
 
@@ -140,8 +170,7 @@ async function sendConvert(direction) {
     // Backend returns JSON on error, binary file on success
     const contentType = response.headers.get('Content-Type') || '';
     if (!response.ok || contentType.includes('application/json')) {
-        const json = await response.json().catch(() => ({ error: 'Erro desconhecido.' }));
-        throw new Error(json.error || `HTTP ${response.status}`);
+        throw new Error(await describeFailure(response));
     }
 
     setProgress(95, 'A descarregar…');

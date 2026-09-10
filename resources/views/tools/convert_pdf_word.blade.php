@@ -204,10 +204,10 @@
                     </div>
                     <div class="accordion-item border-bottom">
                         <h3 class="accordion-header">
-                            <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#cw-q2">Why isn't .doc (old Word) supported?</button>
+                            <button class="accordion-button collapsed fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#cw-q2">Which Word formats can I convert?</button>
                         </h3>
                         <div id="cw-q2" class="accordion-collapse collapse" data-bs-parent="#cw-faq">
-                            <div class="accordion-body text-muted">.doc is a binary legacy format that requires server-side tools to parse. .docx is the modern XML-based format and works directly in the browser. Open your .doc in Word/LibreOffice and save it as .docx.</div>
+                            <div class="accordion-body text-muted">Word &rarr; PDF accepts .docx, legacy .doc (Word 97-2003), .odt and .rtf. .docx gives the most faithful result, because the older formats carry less style information; .rtf in particular loses accented characters. For the best output, open the file in Word or LibreOffice and save it as .docx first.</div>
                         </div>
                     </div>
                     <div class="accordion-item">
